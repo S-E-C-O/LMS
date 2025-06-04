@@ -7,6 +7,9 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 set(CMAKE_PREFIX_PATH "C:/Qt/6.9.1/msvc2022_64")
+include_directories(
+        ${CMAKE_SOURCE_DIR}/include/library
+)
 
 find_package(Qt6 COMPONENTS
   Core
@@ -14,9 +17,13 @@ find_package(Qt6 COMPONENTS
   Widgets
   REQUIRED)
 
-add_executable(LMS main.cpp
-        data/Book.cpp
-        data/Book.h)
+add_executable(LMS src/main.cpp
+        src/Book.cpp
+        include/library/Book.h
+        src/User.cpp
+        include/library/User.h
+        src/UserManager.cpp
+        include/library/UserManager.h)
 target_link_libraries(LMS
   Qt::Core
   Qt::Gui
