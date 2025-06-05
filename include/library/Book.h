@@ -4,6 +4,7 @@
 
 #pragma once
 #include <string_view>
+#include <fstream>
 
 class Book {
     static constexpr size_t MAX_SIZE = 50;
@@ -13,23 +14,29 @@ class Book {
     char publisher[MAX_SIZE]{};
     long publishYear{};
     long ISBN{};
+    int availableCopies{};
+    int totalCopies{};
 
 public:
-    explicit Book(std::string_view title, std::string_view author, std::string_view publisher, long publishYear, long ISBN);
+    explicit Book(std::string_view title = "",
+                  std::string_view author = "",
+                  std::string_view publisher = "",
+                  long publishYear = 0,
+                  long ISBN = 0,
+                  int totalCopies = 1);
 
-    ~Book() = default;
-
-    // 拷贝构造函数
-    Book(const Book&) = default;
-    Book& operator=(const Book&) = default;
-
-    // 移动构造函数
-    Book(Book&&) = default;
-    Book& operator=(Book&&) = default;
+    void serialize(std::ofstream& out) const;
+    void deserialize(std::ifstream& in);
 
     [[nodiscard]] const char* getTitle() const;
     [[nodiscard]] const char* getAuthor() const;
     [[nodiscard]] const char* getPublisher() const;
     [[nodiscard]] long getPublishYear() const;
     [[nodiscard]] long getISBN() const;
+    [[nodiscard]] int getAvailableCopies() const;
+    [[nodiscard]] int getTotalCopies() const;
+
+    friend class Library;
+    void decreaseAvailableCopies();
+    void increaseAvailableCopies();
 };

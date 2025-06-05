@@ -22,8 +22,7 @@ add_executable(LMS src/main.cpp
         include/library/Book.h
         src/User.cpp
         include/library/User.h
-        src/UserManager.cpp
-        include/library/UserManager.h)
+)
 target_link_libraries(LMS
   Qt::Core
   Qt::Gui
