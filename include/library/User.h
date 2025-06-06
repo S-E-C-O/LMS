@@ -5,43 +5,45 @@
 #pragma once
 #include <string_view>
 #include <vector>
-#include <ctime>
-#include <memory>
+#include <fstream>
 
-class Library; // 前向声明
+enum class Group {
+    Reader,
+    Admin
+};
 
 class User {
-public:
-    enum class Group { NORMAL, ADMIN };
+    static constexpr size_t MAX_NAME_SIZE = 50;
+    static constexpr size_t MAX_PASSWORD_SIZE = 50;
 
-private:
-    static constexpr size_t MAX_SIZE = 50;
-    char name[MAX_SIZE]{};
+    char name[MAX_NAME_SIZE]{};
+    char password[MAX_PASSWORD_SIZE]{};
     long id{};
-    char password[MAX_SIZE]{};
     Group group{};
-    std::vector<long> borrowedBooks;
-    std::vector<time_t> borrowDates;
+    std::vector<long> borrowedBooks;  // 存储借阅图书的 ISBN
 
 public:
-    explicit User(std::string_view name = "",
-                  long id = 0,
-                  std::string_view password = "",
-                  Group group = Group::NORMAL);
+    User() = default;
+    User(std::string_view name, std::string_view password, long id, Group group = Group::Reader);
 
+    // 核心功能
+    [[nodiscard]] long getId() const;
+    [[nodiscard]] const char* getName() const;
+    [[nodiscard]] const char* getPassword() const;
+    [[nodiscard]] Group getGroup() const;
+    [[nodiscard]] const std::vector<long>& getBorrowedBooks() const;
+
+    [[nodiscard]] bool checkPassword(std::string_view input) const;
+    bool changePassword(std::string_view oldPwd, std::string_view newPwd);
+    void resetPassword();
+
+    bool borrowBook(long ISBN);
+    bool returnBook(long ISBN);
+
+    // 数据持久化
     void serialize(std::ofstream& out) const;
     void deserialize(std::ifstream& in);
 
-    [[nodiscard]] const char* getName() const;
-    [[nodiscard]] long getId() const;
-    [[nodiscard]] Group getGroup() const;
-    [[nodiscard]] const std::vector<long>& getBorrowedBooks() const;
-    [[nodiscard]] bool isAdmin() const;
-
-    friend class Library;
-    void addBorrowedBook(long ISBN);
-    void removeBorrowedBook(long ISBN);
-
-    [[nodiscard]] bool verifyPassword(std::string_view password) const;
-    void changePassword(std::string_view newPassword);
+    void setName(const std::string & name);
+    void setPassword(const std::string & password);
 };

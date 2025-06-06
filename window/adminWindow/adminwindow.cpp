@@ -1,0 +1,232 @@
+//
+// Created by BlackCyan on 25-6-6.
+//
+
+#include "AdminWindow.h"
+#include "ui_AdminWindow.h"
+
+#include <QMessageBox>
+#include <QInputDialog>
+
+AdminWindow::AdminWindow(Library* library, QWidget* parent)
+    : QMainWindow(parent), ui(new Ui::AdminWindow), library(library),
+      bookModel(new QStandardItemModel(this)), userModel(new QStandardItemModel(this)) {
+    ui->setupUi(this);
+    setupBookTable();
+    setupUserTable();
+    refreshBookTable();
+    refreshUserTable();
+
+    // 图书按钮连接
+    connect(ui->btnAddBook, &QPushButton::clicked, this, &AdminWindow::onAddBook);
+    connect(ui->btnEditBook, &QPushButton::clicked, this, &AdminWindow::onEditBook);
+    connect(ui->btnDeleteBook, &QPushButton::clicked, this, &AdminWindow::onDeleteBook);
+    connect(ui->btnSearchBook, &QPushButton::clicked, this, &AdminWindow::onSearchBook);
+
+    // 用户按钮连接
+    connect(ui->btnAddUser, &QPushButton::clicked, this, &AdminWindow::onAddUser);
+    connect(ui->btnEditUser, &QPushButton::clicked, this, &AdminWindow::onEditUser);
+    connect(ui->btnDeleteUser, &QPushButton::clicked, this, &AdminWindow::onDeleteUser);
+    connect(ui->btnSearchUser, &QPushButton::clicked, this, &AdminWindow::onSearchUser);
+    connect(ui->btnResetPassword, &QPushButton::clicked, this, &AdminWindow::onResetPasswordClicked);
+
+}
+
+AdminWindow::~AdminWindow() {
+    delete ui;
+}
+
+void AdminWindow::setupBookTable() const {
+    bookModel->setHorizontalHeaderLabels({"Title", "Author", "Publisher", "Year", "ISBN", "Available", "Total"});
+    ui->tableViewBooks->setModel(bookModel);
+    ui->tableViewBooks->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+}
+
+void AdminWindow::setupUserTable() const {
+    userModel->setHorizontalHeaderLabels({"ID", "Name", "Group", "Borrowed Count"});
+    ui->tableViewUsers->setModel(userModel);
+    ui->tableViewUsers->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+}
+
+void AdminWindow::refreshBookTable() const {
+    bookModel->removeRows(0, bookModel->rowCount());
+    for (const auto& book : library->getAllBooks()) {
+        QList<QStandardItem*> row;
+        row << new QStandardItem(book.getTitle())
+            << new QStandardItem(book.getAuthor())
+            << new QStandardItem(book.getPublisher())
+            << new QStandardItem(QString::number(book.getPublishYear()))
+            << new QStandardItem(QString::number(book.getISBN()))
+            << new QStandardItem(QString::number(book.getAvailableCopies()))
+            << new QStandardItem(QString::number(book.getTotalCopies()));
+        bookModel->appendRow(row);
+    }
+}
+
+void AdminWindow::refreshUserTable() const {
+    userModel->removeRows(0, userModel->rowCount());
+    for (const auto& user : library->getAllUsers()) {
+        QString group = user.getGroup() == Group::Admin ? "Admin" : "User";
+        userModel->appendRow({
+            new QStandardItem(QString::number(user.getId())),
+            new QStandardItem(user.getName()),
+            new QStandardItem(group),
+            new QStandardItem(QString::number(user.getBorrowedBooks().size()))
+        });
+    }
+}
+
+// 图书操作
+
+void AdminWindow::onAddBook() {
+    bool ok;
+    const QString title = QInputDialog::getText(this, "Add Book", "Title:", QLineEdit::Normal, "", &ok);
+    if (!ok || title.isEmpty()) return;
+    const QString author = QInputDialog::getText(this, "Add Book", "Author:", QLineEdit::Normal, "", &ok);
+    if (!ok || author.isEmpty()) return;
+    const QString publisher = QInputDialog::getText(this, "Add Book", "Publisher:", QLineEdit::Normal, "", &ok);
+    if (!ok || publisher.isEmpty()) return;
+    const long year = QInputDialog::getInt(this, "Add Book", "Publish Year:", 2024, 0, 3000, 1, &ok);
+    if (!ok) return;
+    const long isbn = QInputDialog::getInt(this, "Add Book", "ISBN:", 0, 0, 9999999999999LL, 1, &ok);
+    if (!ok) return;
+    const int total = QInputDialog::getInt(this, "Add Book", "Total Copies:", 1, 1, 999, 1, &ok);
+    if (!ok) return;
+
+    const Book b(title.toStdString(), author.toStdString(), publisher.toStdString(), year, isbn, total);
+    library->addBook(b);
+    refreshBookTable();
+}
+
+void AdminWindow::onEditBook() {
+    const QModelIndex index = ui->tableViewBooks->currentIndex();
+    if (!index.isValid()) return;
+    const long isbn = bookModel->item(index.row(), 4)->text().toLong();
+    Book* book = library->findBookByISBN(isbn);
+    if (!book) return;
+
+    bool ok;
+    const QString newTitle = QInputDialog::getText(this, "Edit Book", "New Title:", QLineEdit::Normal, book->getTitle(), &ok);
+    if (!ok || newTitle.isEmpty()) return;
+    const QString newAuthor = QInputDialog::getText(this, "Edit Book", "New Author:", QLineEdit::Normal, book->getAuthor(), &ok);
+    if (!ok || newAuthor.isEmpty()) return;
+
+    book->setTitle(newTitle.toStdString());
+    book->setAuthor(newAuthor.toStdString());
+
+    refreshBookTable();
+}
+
+void AdminWindow::onDeleteBook() const {
+    const QModelIndex index = ui->tableViewBooks->currentIndex();
+    if (!index.isValid()) return;
+    const long isbn = bookModel->item(index.row(), 4)->text().toLong();
+    library->deleteBook(isbn);
+    refreshBookTable();
+}
+
+void AdminWindow::onSearchBook() {
+    const QString keyword = QInputDialog::getText(this, "Search Book", "Enter title keyword:");
+    const bool showAll = keyword.trimmed().isEmpty();
+
+    bookModel->removeRows(0, bookModel->rowCount());
+
+    for (const auto& book : library->getAllBooks()) {
+        if (showAll || QString(book.getTitle()).contains(keyword, Qt::CaseInsensitive)) {
+            QList<QStandardItem*> row;
+            row << new QStandardItem(book.getTitle())
+                << new QStandardItem(book.getAuthor())
+                << new QStandardItem(book.getPublisher())
+                << new QStandardItem(QString::number(book.getPublishYear()))
+                << new QStandardItem(QString::number(book.getISBN()))
+                << new QStandardItem(QString::number(book.getAvailableCopies()))
+                << new QStandardItem(QString::number(book.getTotalCopies()));
+            bookModel->appendRow(row);
+        }
+    }
+}
+
+
+void AdminWindow::onResetPasswordClicked() {
+    QModelIndex index = ui->tableViewUsers->currentIndex();
+    if (!index.isValid()) {
+        QMessageBox::warning(this, "提示", "请先选中一个用户！");
+        return;
+    }
+
+    long long userId = userModel->item(index.row(), 0)->text().toLongLong();
+    User* user = library->findUserById(userId);
+    if (!user) {
+        QMessageBox::critical(this, "错误", "未找到该用户！");
+        return;
+    }
+
+    if (QMessageBox::question(this, "确认", "确定要将该用户密码重置为 123456？") != QMessageBox::Yes)
+        return;
+
+    user->resetPassword();  // 你需要在 User 类中定义这个函数
+    QMessageBox::information(this, "成功", "密码已成功重置为 123456");
+
+    try {
+        library->saveToFile("user.dat", "book.dat");
+    } catch (const std::exception& e) {
+        QMessageBox::critical(this, "保存失败", e.what());
+    }
+}
+
+
+// 用户操作略同上
+void AdminWindow::onAddUser() {
+    bool ok;
+    const int id = QInputDialog::getInt(this, "Add User", "User ID:", 0, 0, 999999, 1, &ok);
+    if (!ok) return;
+    const QString name = QInputDialog::getText(this, "Add User", "Name:", QLineEdit::Normal, "", &ok);
+    if (!ok || name.isEmpty()) return;
+
+    if (const User u(name.toStdString(), "123456", id); !library->registerUser(u)) {
+        QMessageBox::warning(this, "Failed", "User ID already exists.");
+    }
+    refreshUserTable();
+}
+
+void AdminWindow::onEditUser() {
+    const QModelIndex index = ui->tableViewUsers->currentIndex();
+    if (!index.isValid()) return;
+    const int uid = userModel->item(index.row(), 0)->text().toInt();
+    User* user = library->findUserById(uid);
+    if (!user) return;
+
+    bool ok;
+    const QString name = QInputDialog::getText(this, "Edit User", "New Name:", QLineEdit::Normal, user->getName(), &ok);
+    if (!ok || name.isEmpty()) return;
+
+    user->setName(name.toStdString());
+    refreshUserTable();
+}
+
+void AdminWindow::onDeleteUser() const {
+    const QModelIndex index = ui->tableViewUsers->currentIndex();
+    if (!index.isValid()) return;
+    const int uid = userModel->item(index.row(), 0)->text().toInt();
+    library->deleteUser(uid);
+    refreshUserTable();
+}
+
+void AdminWindow::onSearchUser() {
+    const QString keyword = QInputDialog::getText(this, "Search User", "Enter user name:");
+    const bool showAll = keyword.trimmed().isEmpty();
+
+    userModel->removeRows(0, userModel->rowCount());
+
+    for (const auto& user : library->getAllUsers()) {
+        if (showAll || QString::fromStdString(user.getName()).contains(keyword, Qt::CaseInsensitive)) {
+            QString group = user.getGroup() == Group::Admin ? "Admin" : "User";
+            userModel->appendRow({
+                new QStandardItem(QString::number(user.getId())),
+                new QStandardItem(user.getName()),
+                new QStandardItem(group),
+                new QStandardItem(QString::number(user.getBorrowedBooks().size()))
+            });
+        }
+    }
+}

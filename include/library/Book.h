@@ -12,7 +12,7 @@ class Book {
     char title[MAX_SIZE]{};
     char author[MAX_SIZE]{};
     char publisher[MAX_SIZE]{};
-    long publishYear{};
+    int publishYear{};
     long ISBN{};
     int availableCopies{};
     int totalCopies{};
@@ -31,12 +31,16 @@ public:
     [[nodiscard]] const char* getTitle() const;
     [[nodiscard]] const char* getAuthor() const;
     [[nodiscard]] const char* getPublisher() const;
-    [[nodiscard]] long getPublishYear() const;
+    [[nodiscard]] int getPublishYear() const;
     [[nodiscard]] long getISBN() const;
     [[nodiscard]] int getAvailableCopies() const;
     [[nodiscard]] int getTotalCopies() const;
 
+    void setTitle(std::string_view title);
+    void setAuthor(std::string_view author);
+
     friend class Library;
+
     void decreaseAvailableCopies();
     void increaseAvailableCopies();
 };

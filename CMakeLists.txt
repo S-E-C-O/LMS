@@ -22,6 +22,17 @@ add_executable(LMS src/main.cpp
         include/library/Book.h
         src/User.cpp
         include/library/User.h
+        src/Library.cpp
+        include/library/Library.h
+        window/loginWindow/loginwindow.cpp
+        include/library/loginwindow.h
+        window/loginWindow/loginwindow.ui
+        window/mainWindow/mainwindow.cpp
+        include/library/mainwindow.h
+        window/mainWindow/mainwindow.ui
+        window/adminWindow/adminwindow.cpp
+        include/library/adminwindow.h
+        window/adminWindow/adminwindow.ui
 )
 target_link_libraries(LMS
   Qt::Core
