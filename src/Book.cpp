@@ -3,17 +3,17 @@
 //
 
 #include "Book.h"
+
+#include <QRegularExpression>
 #include <stdexcept>
-#include <algorithm>
 
 Book::Book(std::string_view title,
            std::string_view author,
            std::string_view publisher,
            int publishYear,
-           long ISBN,
+           QString ISBN,
            int totalCopies)
     : publishYear(publishYear),
-      ISBN(ISBN),
       availableCopies(totalCopies),
       totalCopies(totalCopies) {
 
@@ -27,40 +27,37 @@ Book::Book(std::string_view title,
     copyString(title, this->title, MAX_SIZE);
     copyString(author, this->author, MAX_SIZE);
     copyString(publisher, this->publisher, MAX_SIZE);
+    setISBN(ISBN);
 }
 
-void Book::serialize(std::ofstream& out) const {
-    if (!out) throw std::runtime_error("Invalid output stream");
-    out.write(title, MAX_SIZE);
-    out.write(author, MAX_SIZE);
-    out.write(publisher, MAX_SIZE);
-    out.write(reinterpret_cast<const char*>(&publishYear), sizeof(publishYear));
-    out.write(reinterpret_cast<const char*>(&ISBN), sizeof(ISBN));
-    out.write(reinterpret_cast<const char*>(&availableCopies), sizeof(availableCopies));
-    out.write(reinterpret_cast<const char*>(&totalCopies), sizeof(totalCopies));
+void Book::serialize(QDataStream& out) const {
+    out.writeRawData(title, MAX_SIZE);
+    out.writeRawData(author, MAX_SIZE);
+    out.writeRawData(publisher, MAX_SIZE);
+    out << publishYear;
+    out << ISBN;
+    out << availableCopies;
+    out << totalCopies;
 }
 
-void Book::deserialize(std::ifstream& in) {
-    if (!in.read(title, MAX_SIZE)) throw std::runtime_error("Failed to read title");
-    if (!in.read(author, MAX_SIZE)) throw std::runtime_error("Failed to read author");
-    if (!in.read(publisher, MAX_SIZE)) throw std::runtime_error("Failed to read publisher");
+void Book::deserialize(QDataStream& in) {
+    if (in.readRawData(title, MAX_SIZE) != MAX_SIZE) throw std::runtime_error("Failed to read title");
+    if (in.readRawData(author, MAX_SIZE) != MAX_SIZE) throw std::runtime_error("Failed to read author");
+    if (in.readRawData(publisher, MAX_SIZE) != MAX_SIZE) throw std::runtime_error("Failed to read publisher");
 
-    if (!in.read(reinterpret_cast<char*>(&publishYear), sizeof(publishYear)))
-        throw std::runtime_error("Failed to read publishYear");
-    if (!in.read(reinterpret_cast<char*>(&ISBN), sizeof(ISBN)))
-        throw std::runtime_error("Failed to read ISBN");
-    if (!in.read(reinterpret_cast<char*>(&availableCopies), sizeof(availableCopies)))
-        throw std::runtime_error("Failed to read availableCopies");
-    if (!in.read(reinterpret_cast<char*>(&totalCopies), sizeof(totalCopies)))
-        throw std::runtime_error("Failed to read totalCopies");
+    in >> publishYear;
+    in >> ISBN;
+    in >> availableCopies;
+    in >> totalCopies;
 }
+
 
 // Getter
 const char* Book::getTitle() const { return title; }
 const char* Book::getAuthor() const { return author; }
 const char* Book::getPublisher() const { return publisher; }
 int Book::getPublishYear() const { return publishYear; }
-long Book::getISBN() const { return ISBN; }
+const QString &Book::getISBN() const { return ISBN; }
 int Book::getAvailableCopies() const { return availableCopies; }
 int Book::getTotalCopies() const { return totalCopies; }
 
@@ -70,11 +67,34 @@ void Book::setTitle(std::string_view title) {
     std::ranges::copy(title, this->title);
     this->title[title.size()] = '\0';
 }
-
 void Book::setAuthor(std::string_view author) {
     if (author.size() >= MAX_SIZE) throw std::invalid_argument("Author too long");
     std::ranges::copy(author, this->author);
     this->author[author.size()] = '\0';
+}
+void Book::setPublisher(std::string_view publisher) {
+    if (publisher.size() >= MAX_SIZE) throw std::invalid_argument("Publisher too long");
+    std::ranges::copy(publisher, this->publisher);
+    this->publisher[publisher.size()] = '\0';
+}
+void Book::setPublishYear(int year) {
+    if (year < 0 || year > 3000)
+        throw std::invalid_argument("Invalid publish year");
+    this->publishYear = year;
+}
+
+void Book::setISBN(const QString& isbn) {
+    ISBN = isbn;
+}
+
+void Book::setTotalCopies(int total) {
+    if (total < 0)
+        throw std::invalid_argument("Total copies cannot be negative");
+
+    if (availableCopies > total)
+        availableCopies = total;
+
+    this->totalCopies = total;
 }
 
 void Book::decreaseAvailableCopies() {
@@ -83,4 +103,38 @@ void Book::decreaseAvailableCopies() {
 
 void Book::increaseAvailableCopies() {
     if (availableCopies < totalCopies) ++availableCopies;
+}
+
+bool Book::isValidISBN() const {
+    // 去除ISBN中的连字符和空格
+    QString cleanISBN = ISBN;
+    cleanISBN.remove(QRegularExpression("[-\\s]"));
+
+    // ISBN-13 校验
+    if (cleanISBN.length() == 13 && cleanISBN.contains(QRegularExpression("^\\d{13}$"))) {
+        int sum = 0;
+        for (int i = 0; i < 12; ++i) {
+            int digit = cleanISBN[i].digitValue();
+            if (digit < 0) return false;
+            sum += (i % 2 == 0) ? digit : digit * 3;
+        }
+        int checkDigit = (10 - (sum % 10)) % 10;
+        return checkDigit == cleanISBN[12].digitValue();
+    }
+
+    // ISBN-10 校验
+    if (cleanISBN.length() == 10 && cleanISBN.contains(QRegularExpression("^[0-9]{9}[0-9Xx]$"))) {
+        int sum = 0;
+        for (int i = 0; i < 9; ++i) {
+            int digit = cleanISBN[i].digitValue();
+            if (digit < 0) return false;
+            sum += (10 - i) * digit;
+        }
+        char lastChar = cleanISBN[9].toUpper().toLatin1();
+        sum += (lastChar == 'X') ? 10 : (lastChar - '0');
+        return (sum % 11) == 0;
+    }
+
+    // 其它格式不合法
+    return false;
 }

@@ -3,6 +3,7 @@
 //
 
 #pragma once
+
 #include <QMainWindow>
 #include <QStandardItemModel>
 #include "Library.h"
@@ -20,9 +21,9 @@ public:
 
     void trySaveData();
 
-private slots:
-    // 图书操作
-    void onAddBook();
+    private slots:
+        // 图书操作
+        void onAddBook();
     void onEditBook();
     void onDeleteBook() const;
     void onSearchBook();
@@ -49,4 +50,6 @@ private:
     void refreshBookTable() const;
     void refreshUserTable() const;
     void showUserBorrowInfoDialog(long long userId);
+
+    bool isValidISBN(const QString& isbn) const;
 };

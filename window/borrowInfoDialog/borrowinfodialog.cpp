@@ -28,7 +28,7 @@ void BorrowInfoDialog::setBorrowList(const std::vector<BorrowEntry>& list) {
     for (int i = 0; i < static_cast<int>(list.size()); ++i) {
         const auto& entry = list[i];
 
-        QString isbnStr = QString::number(entry.isbn);
+        QString isbnStr = entry.isbn;
         QString timeStr = QDateTime::fromSecsSinceEpoch(entry.borrowTime).toString("yyyy-MM-dd hh:mm:ss");
 
         ui->tableWidget->setItem(i, 0, new QTableWidgetItem(isbnStr));

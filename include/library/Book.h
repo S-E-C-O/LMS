@@ -3,8 +3,8 @@
 //
 
 #pragma once
-#include <string_view>
 #include <fstream>
+#include <qstring.h>
 
 class Book {
     static constexpr size_t MAX_SIZE = 50;
@@ -13,7 +13,7 @@ class Book {
     char author[MAX_SIZE]{};
     char publisher[MAX_SIZE]{};
     int publishYear{};
-    long ISBN{};
+    QString ISBN{};
     int availableCopies{};
     int totalCopies{};
 
@@ -22,23 +22,30 @@ public:
                   std::string_view author = "",
                   std::string_view publisher = "",
                   int publishYear = 0,
-                  long ISBN = 0,
+                  QString ISBN = "",
                   int totalCopies = 1);
 
-    void serialize(std::ofstream& out) const;
-    void deserialize(std::ifstream& in);
+    void serialize(QDataStream &out) const;
+    void deserialize(QDataStream &in);
 
     [[nodiscard]] const char* getTitle() const;
     [[nodiscard]] const char* getAuthor() const;
     [[nodiscard]] const char* getPublisher() const;
     [[nodiscard]] int getPublishYear() const;
-    [[nodiscard]] long getISBN() const;
+    [[nodiscard]] const QString& getISBN() const;
     [[nodiscard]] int getAvailableCopies() const;
     [[nodiscard]] int getTotalCopies() const;
 
     void setTitle(std::string_view title);
     void setAuthor(std::string_view author);
+    void setPublisher(std::string_view publisher);
+    void setPublishYear(int year);
+    void setISBN(const QString &isbn);
+    void setTotalCopies(int total);
 
     void decreaseAvailableCopies();
     void increaseAvailableCopies();
+
+    bool isValidISBN() const;
+
 };

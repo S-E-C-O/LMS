@@ -5,12 +5,13 @@
 #include "AdminWindow.h"
 #include "ui_AdminWindow.h"
 #include "BorrowInfoDialog.h"
+#include "bookeditdialog.h"
 
 #include <QMessageBox>
 #include <QInputDialog>
 #include <QContextMenuEvent>
-
-struct BorrowEntry;
+#include <QRegularExpression>
+#include <QMenu>
 
 AdminWindow::AdminWindow(Library* library, QWidget* parent)
     : QMainWindow(parent), ui(new Ui::AdminWindow), library(library),
@@ -33,7 +34,6 @@ AdminWindow::AdminWindow(Library* library, QWidget* parent)
     connect(ui->btnDeleteUser, &QPushButton::clicked, this, &AdminWindow::onDeleteUser);
     connect(ui->btnSearchUser, &QPushButton::clicked, this, &AdminWindow::onSearchUser);
     connect(ui->btnResetPassword, &QPushButton::clicked, this, &AdminWindow::onResetPasswordClicked);
-
 }
 
 AdminWindow::~AdminWindow() {
@@ -68,7 +68,7 @@ void AdminWindow::refreshBookTable() const {
             << new QStandardItem(book.getAuthor())
             << new QStandardItem(book.getPublisher())
             << new QStandardItem(QString::number(book.getPublishYear()))
-            << new QStandardItem(QString::number(book.getISBN()))
+            << new QStandardItem(book.getISBN())  // ISBN用字符串显示
             << new QStandardItem(QString::number(book.getAvailableCopies()))
             << new QStandardItem(QString::number(book.getTotalCopies()));
         bookModel->appendRow(row);
@@ -88,54 +88,70 @@ void AdminWindow::refreshUserTable() const {
     }
 }
 
-// 图书操作
+bool AdminWindow::isValidISBN(const QString& isbn) const {
+    // 简单校验：10位或13位数字，10位最后允许是X
+    QRegularExpression re("^(\\d{10}|\\d{9}[Xx]|\\d{13})$");
+    return re.match(isbn).hasMatch();
+}
+
+// =================== 图书操作 ===================
 
 void AdminWindow::onAddBook() {
-    bool ok;
-    const QString title = QInputDialog::getText(this, "Add Book", "Title:", QLineEdit::Normal, "", &ok);
-    if (!ok || title.isEmpty()) return;
-    const QString author = QInputDialog::getText(this, "Add Book", "Author:", QLineEdit::Normal, "", &ok);
-    if (!ok || author.isEmpty()) return;
-    const QString publisher = QInputDialog::getText(this, "Add Book", "Publisher:", QLineEdit::Normal, "", &ok);
-    if (!ok || publisher.isEmpty()) return;
-    const long year = QInputDialog::getInt(this, "Add Book", "Publish Year:", 2024, 0, 3000, 1, &ok);
-    if (!ok) return;
-    const long isbn = QInputDialog::getInt(this, "Add Book", "ISBN:", 0, 0, 9999999999999LL, 1, &ok);
-    if (!ok) return;
-    const int total = QInputDialog::getInt(this, "Add Book", "Total Copies:", 1, 1, 999, 1, &ok);
-    if (!ok) return;
+    BookEditDialog dialog(this);
+    if (dialog.exec() == QDialog::Accepted) {
+        QString isbnStr = dialog.getISBN();
+        if (!isValidISBN(isbnStr)) {
+            QMessageBox::warning(this, "错误", "ISBN格式不正确");
+            return;
+        }
+        Book book(dialog.getTitle().toStdString(),
+                  dialog.getAuthor().toStdString(),
+                  dialog.getPublisher().toStdString(),
+                  dialog.getYear(),
+                  isbnStr,
+                  dialog.getTotal());
 
-    const Book b(title.toStdString(), author.toStdString(), publisher.toStdString(), year, isbn, total);
-    library->addBook(b);
-    refreshBookTable();
+        library->addBook(book);
+        trySaveData();
+        refreshBookTable();
+    }
 }
 
 void AdminWindow::onEditBook() {
     const QModelIndex index = ui->tableViewBooks->currentIndex();
     if (!index.isValid()) return;
-    const long isbn = bookModel->item(index.row(), 4)->text().toLong();
-    Book* book = library->findBookByISBN(isbn);
+
+    QString isbnStr = bookModel->item(index.row(), 4)->text();
+    Book* book = library->findBookByISBN(isbnStr);
     if (!book) return;
 
-    bool ok;
-    const QString newTitle = QInputDialog::getText(this, "Edit Book", "New Title:", QLineEdit::Normal, book->getTitle(), &ok);
-    if (!ok || newTitle.isEmpty()) return;
-    const QString newAuthor = QInputDialog::getText(this, "Edit Book", "New Author:", QLineEdit::Normal, book->getAuthor(), &ok);
-    if (!ok || newAuthor.isEmpty()) return;
+    BookEditDialog dialog(this);
+    dialog.setBookInfo(book->getTitle(), book->getAuthor(), book->getPublisher(),
+                       book->getPublishYear(), book->getISBN(), book->getTotalCopies());
 
-    book->setTitle(newTitle.toStdString());
-    book->setAuthor(newAuthor.toStdString());
+    if (dialog.exec() == QDialog::Accepted) {
+        QString newIsbnStr = dialog.getISBN();
+        if (!isValidISBN(newIsbnStr)) {
+            QMessageBox::warning(this, "错误", "ISBN格式不正确");
+            return;
+        }
+        book->setTitle(dialog.getTitle().toStdString());
+        book->setAuthor(dialog.getAuthor().toStdString());
+        book->setPublisher(dialog.getPublisher().toStdString());
+        book->setPublishYear(dialog.getYear());
+        book->setISBN(newIsbnStr);
+        book->setTotalCopies(dialog.getTotal());
 
-    trySaveData();
-
-    refreshBookTable();
+        trySaveData();
+        refreshBookTable();
+    }
 }
 
 void AdminWindow::onDeleteBook() const {
     const QModelIndex index = ui->tableViewBooks->currentIndex();
     if (!index.isValid()) return;
-    const long isbn = bookModel->item(index.row(), 4)->text().toLong();
-    library->deleteBook(isbn);
+    QString isbnStr = bookModel->item(index.row(), 4)->text();
+    library->deleteBook(isbnStr);
     refreshBookTable();
 }
 
@@ -146,13 +162,13 @@ void AdminWindow::onSearchBook() {
     bookModel->removeRows(0, bookModel->rowCount());
 
     for (const auto& book : library->getAllBooks()) {
-        if (showAll || QString(book.getTitle()).contains(keyword, Qt::CaseInsensitive)) {
+        if (showAll || QString::fromStdString(book.getTitle()).contains(keyword, Qt::CaseInsensitive)) {
             QList<QStandardItem*> row;
             row << new QStandardItem(book.getTitle())
                 << new QStandardItem(book.getAuthor())
                 << new QStandardItem(book.getPublisher())
                 << new QStandardItem(QString::number(book.getPublishYear()))
-                << new QStandardItem(QString::number(book.getISBN()))
+                << new QStandardItem(book.getISBN())
                 << new QStandardItem(QString::number(book.getAvailableCopies()))
                 << new QStandardItem(QString::number(book.getTotalCopies()));
             bookModel->appendRow(row);
@@ -160,6 +176,7 @@ void AdminWindow::onSearchBook() {
     }
 }
 
+// =================== 用户操作 ===================
 
 void AdminWindow::onResetPasswordClicked() {
     const QModelIndex index = ui->tableViewUsers->currentIndex();
@@ -211,7 +228,7 @@ void AdminWindow::showUserBorrowInfoDialog(long long userId) {
     }
 
     std::vector<BorrowEntry> borrowList;
-    for (const auto isbn : user->getBorrowedBooks()) {
+    for (const auto& isbn : user->getBorrowedBooks()) {
         if (auto borrowTimeOpt = user->getBorrowTime(isbn)) {
             borrowList.push_back({isbn, *borrowTimeOpt});
         }
@@ -224,7 +241,7 @@ void AdminWindow::showUserBorrowInfoDialog(long long userId) {
 
 void AdminWindow::onAddUser() {
     bool ok;
-    const int id = QInputDialog::getInt(this, "Add User", "User ID:", 0, 0, 999999, 1, &ok);
+    const int id = QInputDialog::getInt(this, "Add User", "User ID:", 0, 0, 999999999, 1, &ok);
     if (!ok) return;
     const QString name = QInputDialog::getText(this, "Add User", "Name:", QLineEdit::Normal, "", &ok);
     if (!ok || name.isEmpty()) return;
@@ -233,7 +250,8 @@ void AdminWindow::onAddUser() {
     const QString groupStr = QInputDialog::getItem(this, "Add User", "Select Group:", groupOptions, 0, false, &ok);
     if (!ok || groupStr.isEmpty()) return;
 
-    if (const Group group = (groupStr == "Admin") ? Group::Admin : Group::User; !library->registerUser(User(name.toStdString(), "123456", id, group))) {
+    Group group = (groupStr == "Admin") ? Group::Admin : Group::User;
+    if (!library->registerUser(User(name.toStdString(), "123456", id, group))) {
         QMessageBox::warning(this, "Failed", "User ID already exists.");
         return;
     }
@@ -258,13 +276,12 @@ void AdminWindow::onEditUser() {
                                                    user->getGroup() == Group::Admin ? 1 : 0, false, &ok);
     if (!ok || groupStr.isEmpty()) return;
 
-    const Group group = (groupStr == "Admin") ? Group::Admin : Group::User;
+    Group group = (groupStr == "Admin") ? Group::Admin : Group::User;
 
     user->setName(name.toStdString());
     user->setGroup(group);
 
     trySaveData();
-
     refreshUserTable();
 }
 

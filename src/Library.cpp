@@ -3,7 +3,9 @@
 //
 
 #include "Library.h"
-#include <fstream>
+#include <QFile>
+#include <QDataStream>
+#include <QDebug>
 #include <algorithm>
 #include <iostream>
 #include <stdexcept>
@@ -13,19 +15,14 @@ void Library::setDataFilePaths(const std::filesystem::path& userPath, const std:
     book_data_file_path = bookPath;
 }
 
-/**
- *
- * @return std::filesystem::path 类型列表，列表第一项为用户数据文件位置，第二项为书籍数据文件位置
- */
 std::vector<std::filesystem::path> Library::getDataFilePaths() {
     return {user_data_file_path, book_data_file_path};
 }
 
-// 用户操作
 bool Library::registerUser(const User& user) {
     if (std::ranges::any_of(users,
                             [&user](const User& u) { return u.getId() == user.getId(); })) {
-        return false;  // 重复 ID 不允许
+        return false;
     }
     users.push_back(user);
     saveToFile(user_data_file_path, book_data_file_path);
@@ -74,20 +71,23 @@ const std::vector<User>& Library::getAllUsers() const {
     return users;
 }
 
-// 图书操作
 bool Library::addBook(const Book& book) {
+    if (!book.isValidISBN()) {
+        qWarning() << "无效ISBN，添加失败！";
+        return false;
+    }
     if (std::ranges::any_of(books,
-                            [&book](const Book& b) { return b.getISBN() == book.getISBN(); })) {
-        return false;  // 重复 ISBN 不允许
+        [&book](const Book& b) { return b.getISBN() == book.getISBN(); })) {
+        return false;
     }
     books.push_back(book);
     saveToFile(user_data_file_path, book_data_file_path);
     return true;
 }
 
-bool Library::deleteBook(long ISBN) {
-    const auto it = std::ranges::remove_if(books,
-                                     [ISBN](const Book& b) { return b.getISBN() == ISBN; }).begin();
+bool Library::deleteBook(const QString& ISBN) {
+    auto it = std::ranges::remove_if(books,
+        [&ISBN](const Book& b) { return b.getISBN() == ISBN; }).begin();
     if (it != books.end()) {
         books.erase(it, books.end());
         saveToFile(user_data_file_path, book_data_file_path);
@@ -107,7 +107,7 @@ bool Library::updateBook(const Book& updatedBook) {
     return false;
 }
 
-Book* Library::findBookByISBN(const long ISBN) {
+Book* Library::findBookByISBN(const QString& ISBN) {
     for (auto& book : books) {
         if (book.getISBN() == ISBN)
             return &book;
@@ -119,7 +119,6 @@ const std::vector<Book>& Library::getAllBooks() const {
     return books;
 }
 
-// 图书搜索
 std::vector<Book> Library::searchBooksByTitle(const std::string_view keyword) const {
     if (keyword.empty()) return books;
     std::vector<Book> results;
@@ -148,8 +147,7 @@ std::vector<Book> Library::searchBooksByPublisher(const std::string_view keyword
     return results;
 }
 
-// 借书
-bool Library::borrowBook(const long userId, const long ISBN) {
+bool Library::borrowBook(long userId, const QString& ISBN) {
     User* user = findUserById(userId);
     Book* book = findBookByISBN(ISBN);
     if (!user || !book || book->getAvailableCopies() <= 0)
@@ -160,8 +158,7 @@ bool Library::borrowBook(const long userId, const long ISBN) {
     return true;
 }
 
-// 还书
-bool Library::returnBook(const long userId, const long ISBN) {
+bool Library::returnBook(long userId, const QString& ISBN) {
     User* user = findUserById(userId);
     Book* book = findBookByISBN(ISBN);
     if (!user || !book)
@@ -172,83 +169,62 @@ bool Library::returnBook(const long userId, const long ISBN) {
     return true;
 }
 
-// 数据持久化
 void Library::saveToFile(const std::filesystem::path &userFile, const std::filesystem::path &bookFile) const {
-    std::ofstream uout(userFile, std::ios::binary);
-    std::ofstream bout(bookFile, std::ios::binary);
-    if (!uout || !bout)
+    QFile userQFile(QString::fromStdString(userFile.string()));
+    QFile bookQFile(QString::fromStdString(bookFile.string()));
+
+    if (!userQFile.open(QIODevice::WriteOnly) || !bookQFile.open(QIODevice::WriteOnly))
         throw std::runtime_error("Failed to open data files for saving");
 
-    size_t userCount = users.size();
-    uout.write(reinterpret_cast<const char*>(&userCount), sizeof(userCount));
+    QDataStream uout(&userQFile);
+    QDataStream bout(&bookQFile);
+
+    uout << static_cast<quint32>(users.size());
     for (const auto& user : users)
         user.serialize(uout);
 
-    size_t bookCount = books.size();
-    bout.write(reinterpret_cast<const char*>(&bookCount), sizeof(bookCount));
+    bout << static_cast<quint32>(books.size());
     for (const auto& book : books)
         book.serialize(bout);
+
+    userQFile.close();
+    bookQFile.close();
 }
 
 void Library::loadFromFile(const std::filesystem::path &userFile, const std::filesystem::path &bookFile) {
     users.clear();
-    if (!exists(userFile)) {
-        // 创建默认管理员用户
+    books.clear();
+
+    QFile userQFile(QString::fromStdString(userFile.string()));
+    if (!userQFile.exists()) {
         User adminUser("Admin", "P@ssw0rd", 100, Group::Admin);
         users.push_back(adminUser);
+        saveToFile(userFile, bookFile);
+        return;
+    }
 
-        std::ofstream ofs(userFile, std::ios::binary);
-        if (!ofs) {
-            std::cerr << "Failed to create user data file\n";
-            return;
-        }
-
-        // 写入用户数量 + serialize 格式
-        size_t userCount = users.size();
-        ofs.write(reinterpret_cast<const char*>(&userCount), sizeof(userCount));
-        for (const auto& u : users) {
-            u.serialize(ofs);
-        }
-
-        ofs.close();
-        std::cout << "Created default admin user and saved using structured format.\n";
-    } else {
-        // 读取用户数量 + deserialize 格式
-        std::ifstream ifs(userFile, std::ios::binary);
-        if (!ifs) {
-            std::cerr << "Failed to open user data file\n";
-            return;
-        }
-
-        size_t userCount = 0;
-        ifs.read(reinterpret_cast<char*>(&userCount), sizeof(userCount));
-        for (size_t i = 0; i < userCount; ++i) {
+    if (userQFile.open(QIODevice::ReadOnly)) {
+        QDataStream in(&userQFile);
+        quint32 userCount;
+        in >> userCount;
+        for (quint32 i = 0; i < userCount; ++i) {
             User temp;
-            temp.deserialize(ifs);
+            temp.deserialize(in);
             users.push_back(temp);
         }
-
-        ifs.close();
+        userQFile.close();
     }
 
-    // 处理书籍
-    books.clear();
-    if (exists(bookFile)) {
-        std::ifstream ifs(bookFile, std::ios::binary);
-        if (!ifs) {
-            std::cerr << "Failed to open book data file\n";
-            return;
-        }
-
-        size_t bookCount = 0;
-        ifs.read(reinterpret_cast<char*>(&bookCount), sizeof(bookCount));
-        for (size_t i = 0; i < bookCount; ++i) {
+    QFile bookQFile(QString::fromStdString(bookFile.string()));
+    if (bookQFile.open(QIODevice::ReadOnly)) {
+        QDataStream in(&bookQFile);
+        quint32 bookCount;
+        in >> bookCount;
+        for (quint32 i = 0; i < bookCount; ++i) {
             Book temp;
-            temp.deserialize(ifs);
+            temp.deserialize(in);
             books.push_back(temp);
         }
-
-        ifs.close();
+        bookQFile.close();
     }
 }
-

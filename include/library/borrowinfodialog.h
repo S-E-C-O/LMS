@@ -13,7 +13,7 @@ namespace Ui { class BorrowInfoDialog; }
 QT_END_NAMESPACE
 
 struct BorrowEntry {
-    long isbn;
+    const QString& isbn;
     std::time_t borrowTime;
 };
 

@@ -3,11 +3,11 @@
 //
 
 #pragma once
-#include <string_view>
 #include <vector>
 #include <fstream>
 #include <map>
 #include <optional>
+#include <qstring.h>
 
 enum class Group {
     User,
@@ -21,10 +21,10 @@ class User {
 
     char name[MAX_NAME_SIZE]{};
     char password[MAX_PASSWORD_SIZE]{};
-    long id{};
+    long long id{};
     Group group{};
-    std::vector<long> borrowedBooks;
-    std::map<long, time_t> borrowedTime;
+    std::vector<QString> borrowedBooks;
+    std::map<QString, time_t> borrowedTime;
 
 public:
     User() = default;
@@ -35,20 +35,20 @@ public:
     [[nodiscard]] const char* getName() const;
     [[nodiscard]] const char* getPassword() const;
     [[nodiscard]] Group getGroup() const;
-    [[nodiscard]] const std::vector<long>& getBorrowedBooks() const;
+    [[nodiscard]] std::vector<QString> getBorrowedBooks() const;
 
-    std::optional<std::time_t> getBorrowTime(long ISBN) const;
+    std::optional<std::time_t> getBorrowTime(const QString& ISBN) const;
 
     [[nodiscard]] bool checkPassword(std::string_view input) const;
     bool changePassword(std::string_view oldPwd, std::string_view newPwd);
     void resetPassword();
 
-    bool borrowBook(long ISBN);
-    bool returnBook(long ISBN);
+    bool borrowBook(const QString &ISBN);
+    bool returnBook(const QString &ISBN);
 
     // 数据持久化
-    void serialize(std::ofstream& out) const;
-    void deserialize(std::ifstream& in);
+    void serialize(QDataStream &out) const;
+    void deserialize(QDataStream &in);
 
     void setName(const std::string & name);
     void setPassword(const std::string & password);

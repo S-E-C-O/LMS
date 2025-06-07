@@ -8,6 +8,7 @@
 #include "Book.h"
 #include <vector>
 #include <filesystem>
+#include <qstring.h>
 
 class Library {
     std::vector<User> users;
@@ -30,9 +31,9 @@ public:
 
     // 图书操作
     bool addBook(const Book& book);
-    bool deleteBook(long ISBN);
+    bool deleteBook(const QString& ISBN);
     bool updateBook(const Book& updatedBook);
-    Book* findBookByISBN(long ISBN);
+    Book* findBookByISBN(const QString& ISBN);
     [[nodiscard]] const std::vector<Book>& getAllBooks() const;
 
     // 图书搜索
@@ -40,8 +41,8 @@ public:
     [[nodiscard]] std::vector<Book> searchBooksByAuthor(std::string_view keyword) const;
     [[nodiscard]] std::vector<Book> searchBooksByPublisher(std::string_view keyword) const;
 
-    bool borrowBook(long userId, long ISBN);
-    bool returnBook(long userId, long ISBN);
+    bool borrowBook(long userId, const QString& ISBN);
+    bool returnBook(long userId, const QString& ISBN);
 
     // 数据持久化
     void saveToFile(const std::filesystem::path &userFile, const std::filesystem::path &bookFile) const;

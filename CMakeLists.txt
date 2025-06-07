@@ -36,6 +36,9 @@ add_executable(LMS src/main.cpp
         window/borrowInfoDialog/borrowinfodialog.cpp
         include/library/borrowinfodialog.h
         window/borrowInfoDialog/borrowinfodialog.ui
+        window/bookeditdialog.cpp
+        include/library/bookeditdialog.h
+        window/bookeditdialog.ui
 )
 target_link_libraries(LMS
   Qt::Core

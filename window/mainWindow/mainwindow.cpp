@@ -54,6 +54,6 @@ void MainWindow::populateTable(const std::vector<Book>& books) const {
         tableWidget->setItem(row, 1, new QTableWidgetItem(book.getAuthor()));
         tableWidget->setItem(row, 2, new QTableWidgetItem(book.getPublisher()));
         tableWidget->setItem(row, 3, new QTableWidgetItem(QString::number(book.getPublishYear())));
-        tableWidget->setItem(row, 4, new QTableWidgetItem(QString::number(book.getISBN())));
+        tableWidget->setItem(row, 4, new QTableWidgetItem(book.getISBN()));
     }
 }

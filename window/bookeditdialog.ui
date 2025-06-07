@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+    <class>BookEditDialog</class>
+    <widget class="QDialog" name="BookEditDialog">
+        <property name="windowTitle">
+            <string>Edit Book</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout">
+            <item>
+                <widget class="QWidget" name="formWidget">
+                    <layout class="QFormLayout" name="formLayout">
+                        <property name="labelAlignment">
+                            <set>Qt::AlignRight|Qt::AlignVCenter</set>
+                        </property>
+                        <property name="formAlignment">
+                            <set>Qt::AlignLeft|Qt::AlignTop</set>
+                        </property>
+
+                        <item row="0" column="0">
+                            <widget class="QLabel" name="labelTitle">
+                                <property name="text">
+                                    <string>Title:</string>
+                                </property>
+                            </widget>
+                        </item>
+                        <item row="0" column="1">
+                            <widget class="QLineEdit" name="lineEditTitle"/>
+                        </item>
+
+                        <item row="1" column="0">
+                            <widget class="QLabel" name="labelAuthor">
+                                <property name="text">
+                                    <string>Author:</string>
+                                </property>
+                            </widget>
+                        </item>
+                        <item row="1" column="1">
+                            <widget class="QLineEdit" name="lineEditAuthor"/>
+                        </item>
+
+                        <item row="2" column="0">
+                            <widget class="QLabel" name="labelPublisher">
+                                <property name="text">
+                                    <string>Publisher:</string>
+                                </property>
+                            </widget>
+                        </item>
+                        <item row="2" column="1">
+                            <widget class="QLineEdit" name="lineEditPublisher"/>
+                        </item>
+
+                        <item row="3" column="0">
+                            <widget class="QLabel" name="labelYear">
+                                <property name="text">
+                                    <string>Year:</string>
+                                </property>
+                            </widget>
+                        </item>
+                        <item row="3" column="1">
+                            <widget class="QLineEdit" name="lineEditYear"/>
+                        </item>
+
+                        <item row="4" column="0">
+                            <widget class="QLabel" name="labelISBN">
+                                <property name="text">
+                                    <string>ISBN:</string>
+                                </property>
+                            </widget>
+                        </item>
+                        <item row="4" column="1">
+                            <widget class="QLineEdit" name="lineEditISBN"/>
+                        </item>
+
+                        <item row="5" column="0">
+                            <widget class="QLabel" name="labelTotal">
+                                <property name="text">
+                                    <string>Total Copies:</string>
+                                </property>
+                            </widget>
+                        </item>
+                        <item row="5" column="1">
+                            <widget class="QLineEdit" name="lineEditTotal"/>
+                        </item>
+                    </layout>
+                </widget>
+            </item>
+
+            <item>
+                <layout class="QHBoxLayout" name="buttonLayout">
+                    <item>
+                        <spacer name="horizontalSpacer">
+                            <property name="orientation">
+                                <enum>Qt::Horizontal</enum>
+                            </property>
+                            <property name="sizeHint" stdset="0">
+                                <size>
+                                    <width>40</width>
+                                    <height>20</height>
+                                </size>
+                            </property>
+                        </spacer>
+                    </item>
+                    <item>
+                        <widget class="QPushButton" name="buttonBoxOk">
+                            <property name="text">
+                                <string>OK</string>
+                            </property>
+                            <property name="default">
+                                <bool>true</bool>
+                            </property>
+                            <property name="autoDefault">
+                                <bool>false</bool>
+                            </property>
+                        </widget>
+                    </item>
+                    <item>
+                        <widget class="QPushButton" name="buttonBoxCancel">
+                            <property name="text">
+                                <string>Cancel</string>
+                            </property>
+                            <property name="autoDefault">
+                                <bool>false</bool>
+                            </property>
+                        </widget>
+                    </item>
+                </layout>
+            </item>
+        </layout>
+    </widget>
+
+    <connections>
+        <connection>
+            <sender>buttonBoxOk</sender>
+            <signal>clicked()</signal>
+            <receiver>BookEditDialog</receiver>
+            <slot>accept()</slot>
+            <hints>
+                <hint type="sourcelabel">OK Button</hint>
+            </hints>
+        </connection>
+        <connection>
+            <sender>buttonBoxCancel</sender>
+            <signal>clicked()</signal>
+            <receiver>BookEditDialog</receiver>
+            <slot>reject()</slot>
+            <hints>
+                <hint type="sourcelabel">Cancel Button</hint>
+            </hints>
+        </connection>
+    </connections>
+</ui>
