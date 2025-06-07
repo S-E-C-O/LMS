@@ -22,7 +22,7 @@ public:
                   std::string_view author = "",
                   std::string_view publisher = "",
                   int publishYear = 0,
-                  QString ISBN = "",
+                  const QString &ISBN = "",
                   int totalCopies = 1);
 
     void serialize(QDataStream &out) const;

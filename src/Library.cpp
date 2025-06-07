@@ -10,6 +10,8 @@
 #include <iostream>
 #include <stdexcept>
 
+#include "CompressionUtil.h"
+
 void Library::setDataFilePaths(const std::filesystem::path& userPath, const std::filesystem::path& bookPath) {
     user_data_file_path = userPath;
     book_data_file_path = bookPath;
@@ -180,16 +182,25 @@ void Library::saveToFile(const std::filesystem::path &userFile, const std::files
     QDataStream bout(&bookQFile);
 
     uout << static_cast<quint32>(users.size());
-    for (const auto& user : users)
-        user.serialize(uout);
+    for (const auto& user : users) {
+        QByteArray compressed = CompressionUtil::compressObject([&](QDataStream& s) {
+            user.serialize(s);
+        });
+        uout << compressed;
+    }
 
     bout << static_cast<quint32>(books.size());
-    for (const auto& book : books)
-        book.serialize(bout);
+    for (const auto& book : books) {
+        QByteArray compressed = CompressionUtil::compressObject([&](QDataStream& s) {
+            book.serialize(s);
+        });
+        bout << compressed;
+    }
 
     userQFile.close();
     bookQFile.close();
 }
+
 
 void Library::loadFromFile(const std::filesystem::path &userFile, const std::filesystem::path &bookFile) {
     users.clear();
@@ -207,9 +218,16 @@ void Library::loadFromFile(const std::filesystem::path &userFile, const std::fil
         QDataStream in(&userQFile);
         quint32 userCount;
         in >> userCount;
+
         for (quint32 i = 0; i < userCount; ++i) {
+            QByteArray compressed;
+            in >> compressed;
+
             User temp;
-            temp.deserialize(in);
+            CompressionUtil::decompressObject(compressed, [&](QDataStream& s) {
+                temp.deserialize(s);
+            });
+
             users.push_back(temp);
         }
         userQFile.close();
@@ -220,9 +238,16 @@ void Library::loadFromFile(const std::filesystem::path &userFile, const std::fil
         QDataStream in(&bookQFile);
         quint32 bookCount;
         in >> bookCount;
+
         for (quint32 i = 0; i < bookCount; ++i) {
+            QByteArray compressed;
+            in >> compressed;
+
             Book temp;
-            temp.deserialize(in);
+            CompressionUtil::decompressObject(compressed, [&](QDataStream& s) {
+                temp.deserialize(s);
+            });
+
             books.push_back(temp);
         }
         bookQFile.close();

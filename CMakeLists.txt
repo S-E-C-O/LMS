@@ -39,6 +39,8 @@ add_executable(LMS src/main.cpp
         window/bookEditDialog/bookeditdialog.cpp
         include/library/bookeditdialog.h
         window/bookEditDialog/bookeditdialog.ui
+        util/CompressionUtil.cpp
+        include/library/CompressionUtil.h
 )
 target_link_libraries(LMS
   Qt::Core

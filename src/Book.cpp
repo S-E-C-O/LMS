@@ -10,9 +10,9 @@
 Book::Book(std::string_view title,
            std::string_view author,
            std::string_view publisher,
-           int publishYear,
-           QString ISBN,
-           int totalCopies)
+           const int publishYear,
+           const QString &ISBN,
+           const int totalCopies)
     : publishYear(publishYear),
       availableCopies(totalCopies),
       totalCopies(totalCopies) {
@@ -50,7 +50,6 @@ void Book::deserialize(QDataStream& in) {
     in >> availableCopies;
     in >> totalCopies;
 }
-
 
 // Getter
 const char* Book::getTitle() const { return title; }
