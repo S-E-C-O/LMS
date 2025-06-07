@@ -6,11 +6,14 @@
 #include <string_view>
 #include <vector>
 #include <fstream>
+#include <map>
+#include <optional>
 
 enum class Group {
-    Reader,
+    User,
     Admin
 };
+
 
 class User {
     static constexpr size_t MAX_NAME_SIZE = 50;
@@ -20,11 +23,12 @@ class User {
     char password[MAX_PASSWORD_SIZE]{};
     long id{};
     Group group{};
-    std::vector<long> borrowedBooks;  // 存储借阅图书的 ISBN
+    std::vector<long> borrowedBooks;
+    std::map<long, time_t> borrowedTime;
 
 public:
     User() = default;
-    User(std::string_view name, std::string_view password, long id, Group group = Group::Reader);
+    User(std::string_view name, std::string_view password, long id, Group group = Group::User);
 
     // 核心功能
     [[nodiscard]] long getId() const;
@@ -32,6 +36,8 @@ public:
     [[nodiscard]] const char* getPassword() const;
     [[nodiscard]] Group getGroup() const;
     [[nodiscard]] const std::vector<long>& getBorrowedBooks() const;
+
+    std::optional<std::time_t> getBorrowTime(long ISBN) const;
 
     [[nodiscard]] bool checkPassword(std::string_view input) const;
     bool changePassword(std::string_view oldPwd, std::string_view newPwd);
@@ -46,4 +52,6 @@ public:
 
     void setName(const std::string & name);
     void setPassword(const std::string & password);
+
+    void setGroup(Group group);
 };

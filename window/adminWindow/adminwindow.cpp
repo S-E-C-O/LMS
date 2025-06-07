@@ -4,9 +4,13 @@
 
 #include "AdminWindow.h"
 #include "ui_AdminWindow.h"
+#include "BorrowInfoDialog.h"
 
 #include <QMessageBox>
 #include <QInputDialog>
+#include <QContextMenuEvent>
+
+struct BorrowEntry;
 
 AdminWindow::AdminWindow(Library* library, QWidget* parent)
     : QMainWindow(parent), ui(new Ui::AdminWindow), library(library),
@@ -34,6 +38,14 @@ AdminWindow::AdminWindow(Library* library, QWidget* parent)
 
 AdminWindow::~AdminWindow() {
     delete ui;
+}
+
+void AdminWindow::trySaveData() {
+    try {
+        library->saveToFile(library->getDataFilePaths()[0], library->getDataFilePaths()[1]);
+    } catch (const std::exception& e) {
+        QMessageBox::critical(this, "保存失败", e.what());
+    }
 }
 
 void AdminWindow::setupBookTable() const {
@@ -114,6 +126,8 @@ void AdminWindow::onEditBook() {
     book->setTitle(newTitle.toStdString());
     book->setAuthor(newAuthor.toStdString());
 
+    trySaveData();
+
     refreshBookTable();
 }
 
@@ -148,13 +162,13 @@ void AdminWindow::onSearchBook() {
 
 
 void AdminWindow::onResetPasswordClicked() {
-    QModelIndex index = ui->tableViewUsers->currentIndex();
+    const QModelIndex index = ui->tableViewUsers->currentIndex();
     if (!index.isValid()) {
         QMessageBox::warning(this, "提示", "请先选中一个用户！");
         return;
     }
 
-    long long userId = userModel->item(index.row(), 0)->text().toLongLong();
+    const long long userId = userModel->item(index.row(), 0)->text().toLongLong();
     User* user = library->findUserById(userId);
     if (!user) {
         QMessageBox::critical(this, "错误", "未找到该用户！");
@@ -164,18 +178,50 @@ void AdminWindow::onResetPasswordClicked() {
     if (QMessageBox::question(this, "确认", "确定要将该用户密码重置为 123456？") != QMessageBox::Yes)
         return;
 
-    user->resetPassword();  // 你需要在 User 类中定义这个函数
+    user->resetPassword();
     QMessageBox::information(this, "成功", "密码已成功重置为 123456");
 
-    try {
-        library->saveToFile("user.dat", "book.dat");
-    } catch (const std::exception& e) {
-        QMessageBox::critical(this, "保存失败", e.what());
-    }
+    trySaveData();
 }
 
+void AdminWindow::contextMenuEvent(QContextMenuEvent* event) {
+    QPoint pos = ui->tableViewUsers->viewport()->mapFromGlobal(event->globalPos());
+    QModelIndex index = ui->tableViewUsers->indexAt(pos);
+    if (!index.isValid()) {
+        QMainWindow::contextMenuEvent(event);
+        return;
+    }
 
-// 用户操作略同上
+    QMenu menu(this);
+    QAction* viewBorrowInfoAction = menu.addAction("查看借阅信息");
+
+    connect(viewBorrowInfoAction, &QAction::triggered, [this, index]() {
+        long long userId = userModel->item(index.row(), 0)->text().toLongLong();
+        showUserBorrowInfoDialog(userId);
+    });
+
+    menu.exec(event->globalPos());
+}
+
+void AdminWindow::showUserBorrowInfoDialog(long long userId) {
+    const User* user = library->findUserById(userId);
+    if (!user) {
+        QMessageBox::warning(this, "错误", "未找到该用户");
+        return;
+    }
+
+    std::vector<BorrowEntry> borrowList;
+    for (const auto isbn : user->getBorrowedBooks()) {
+        if (auto borrowTimeOpt = user->getBorrowTime(isbn)) {
+            borrowList.push_back({isbn, *borrowTimeOpt});
+        }
+    }
+
+    BorrowInfoDialog dialog(this);
+    dialog.setBorrowList(borrowList);
+    dialog.exec();
+}
+
 void AdminWindow::onAddUser() {
     bool ok;
     const int id = QInputDialog::getInt(this, "Add User", "User ID:", 0, 0, 999999, 1, &ok);
@@ -183,15 +229,22 @@ void AdminWindow::onAddUser() {
     const QString name = QInputDialog::getText(this, "Add User", "Name:", QLineEdit::Normal, "", &ok);
     if (!ok || name.isEmpty()) return;
 
-    if (const User u(name.toStdString(), "123456", id); !library->registerUser(u)) {
+    const QStringList groupOptions = {"User", "Admin"};
+    const QString groupStr = QInputDialog::getItem(this, "Add User", "Select Group:", groupOptions, 0, false, &ok);
+    if (!ok || groupStr.isEmpty()) return;
+
+    if (const Group group = (groupStr == "Admin") ? Group::Admin : Group::User; !library->registerUser(User(name.toStdString(), "123456", id, group))) {
         QMessageBox::warning(this, "Failed", "User ID already exists.");
+        return;
     }
+
     refreshUserTable();
 }
 
 void AdminWindow::onEditUser() {
     const QModelIndex index = ui->tableViewUsers->currentIndex();
     if (!index.isValid()) return;
+
     const int uid = userModel->item(index.row(), 0)->text().toInt();
     User* user = library->findUserById(uid);
     if (!user) return;
@@ -200,7 +253,18 @@ void AdminWindow::onEditUser() {
     const QString name = QInputDialog::getText(this, "Edit User", "New Name:", QLineEdit::Normal, user->getName(), &ok);
     if (!ok || name.isEmpty()) return;
 
+    const QStringList groupOptions = {"User", "Admin"};
+    const QString groupStr = QInputDialog::getItem(this, "Edit User", "New Group:", groupOptions,
+                                                   user->getGroup() == Group::Admin ? 1 : 0, false, &ok);
+    if (!ok || groupStr.isEmpty()) return;
+
+    const Group group = (groupStr == "Admin") ? Group::Admin : Group::User;
+
     user->setName(name.toStdString());
+    user->setGroup(group);
+
+    trySaveData();
+
     refreshUserTable();
 }
 

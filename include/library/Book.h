@@ -21,7 +21,7 @@ public:
     explicit Book(std::string_view title = "",
                   std::string_view author = "",
                   std::string_view publisher = "",
-                  long publishYear = 0,
+                  int publishYear = 0,
                   long ISBN = 0,
                   int totalCopies = 1);
 
@@ -38,8 +38,6 @@ public:
 
     void setTitle(std::string_view title);
     void setAuthor(std::string_view author);
-
-    friend class Library;
 
     void decreaseAvailableCopies();
     void increaseAvailableCopies();

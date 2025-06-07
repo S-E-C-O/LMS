@@ -18,6 +18,8 @@ public:
     explicit AdminWindow(Library* library, QWidget* parent = nullptr);
     ~AdminWindow() override;
 
+    void trySaveData();
+
 private slots:
     // 图书操作
     void onAddBook();
@@ -32,6 +34,9 @@ private slots:
     void onSearchUser();
     void onResetPasswordClicked();
 
+protected:
+    void contextMenuEvent(QContextMenuEvent* event) override;
+
 private:
     Ui::AdminWindow* ui;
     Library* library;
@@ -43,4 +48,5 @@ private:
     void setupUserTable() const;
     void refreshBookTable() const;
     void refreshUserTable() const;
+    void showUserBorrowInfoDialog(long long userId);
 };

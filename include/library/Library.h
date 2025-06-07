@@ -18,6 +18,7 @@ class Library {
 
 public:
     void setDataFilePaths(const std::filesystem::path& userPath, const std::filesystem::path& bookPath);
+    std::vector<std::filesystem::path> getDataFilePaths();
 
     // 用户操作
     bool registerUser(const User& user);

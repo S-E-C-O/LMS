@@ -13,6 +13,13 @@ void Library::setDataFilePaths(const std::filesystem::path& userPath, const std:
     book_data_file_path = bookPath;
 }
 
+/**
+ *
+ * @return std::filesystem::path 类型列表，列表第一项为用户数据文件位置，第二项为书籍数据文件位置
+ */
+std::vector<std::filesystem::path> Library::getDataFilePaths() {
+    return {user_data_file_path, book_data_file_path};
+}
 
 // 用户操作
 bool Library::registerUser(const User& user) {
@@ -100,7 +107,7 @@ bool Library::updateBook(const Book& updatedBook) {
     return false;
 }
 
-Book* Library::findBookByISBN(long ISBN) {
+Book* Library::findBookByISBN(const long ISBN) {
     for (auto& book : books) {
         if (book.getISBN() == ISBN)
             return &book;
@@ -142,7 +149,7 @@ std::vector<Book> Library::searchBooksByPublisher(const std::string_view keyword
 }
 
 // 借书
-bool Library::borrowBook(long userId, long ISBN) {
+bool Library::borrowBook(const long userId, const long ISBN) {
     User* user = findUserById(userId);
     Book* book = findBookByISBN(ISBN);
     if (!user || !book || book->getAvailableCopies() <= 0)
@@ -154,7 +161,7 @@ bool Library::borrowBook(long userId, long ISBN) {
 }
 
 // 还书
-bool Library::returnBook(long userId, long ISBN) {
+bool Library::returnBook(const long userId, const long ISBN) {
     User* user = findUserById(userId);
     Book* book = findBookByISBN(ISBN);
     if (!user || !book)

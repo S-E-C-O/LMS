@@ -1,3 +1,5 @@
 .idea
 .editorconfig
 cmake-build-debug
+
+data/*.dat

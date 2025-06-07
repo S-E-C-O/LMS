@@ -9,7 +9,7 @@
 Book::Book(std::string_view title,
            std::string_view author,
            std::string_view publisher,
-           long publishYear,
+           int publishYear,
            long ISBN,
            int totalCopies)
     : publishYear(publishYear),
@@ -31,7 +31,6 @@ Book::Book(std::string_view title,
 
 void Book::serialize(std::ofstream& out) const {
     if (!out) throw std::runtime_error("Invalid output stream");
-
     out.write(title, MAX_SIZE);
     out.write(author, MAX_SIZE);
     out.write(publisher, MAX_SIZE);
@@ -40,7 +39,6 @@ void Book::serialize(std::ofstream& out) const {
     out.write(reinterpret_cast<const char*>(&availableCopies), sizeof(availableCopies));
     out.write(reinterpret_cast<const char*>(&totalCopies), sizeof(totalCopies));
 }
-
 
 void Book::deserialize(std::ifstream& in) {
     if (!in.read(title, MAX_SIZE)) throw std::runtime_error("Failed to read title");
@@ -57,8 +55,6 @@ void Book::deserialize(std::ifstream& in) {
         throw std::runtime_error("Failed to read totalCopies");
 }
 
-
-
 // Getter
 const char* Book::getTitle() const { return title; }
 const char* Book::getAuthor() const { return author; }
@@ -74,6 +70,7 @@ void Book::setTitle(std::string_view title) {
     std::ranges::copy(title, this->title);
     this->title[title.size()] = '\0';
 }
+
 void Book::setAuthor(std::string_view author) {
     if (author.size() >= MAX_SIZE) throw std::invalid_argument("Author too long");
     std::ranges::copy(author, this->author);
