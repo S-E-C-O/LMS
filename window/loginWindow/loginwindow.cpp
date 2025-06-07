@@ -13,18 +13,18 @@ LoginWindow::LoginWindow(Library* library, QWidget* parent)
     : QWidget(parent), library(library) {
 
     idEdit = new QLineEdit(this);
-    idEdit->setPlaceholderText("User ID");
+    idEdit->setPlaceholderText("ID");
     // 只允许输入数字
     idEdit->setValidator(new QIntValidator(1, 999999999, this));
 
     passwordEdit = new QLineEdit(this);
-    passwordEdit->setPlaceholderText("Password");
+    passwordEdit->setPlaceholderText("密码");
     passwordEdit->setEchoMode(QLineEdit::Password);
 
     // 按回车登录
     connect(passwordEdit, &QLineEdit::returnPressed, this, &LoginWindow::onPasswordReturnPressed);
 
-    loginButton = new QPushButton("Login", this);
+    loginButton = new QPushButton("登录", this);
 
     auto* layout = new QVBoxLayout(this);
     layout->addWidget(idEdit);

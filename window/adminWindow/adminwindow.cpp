@@ -49,13 +49,13 @@ void AdminWindow::trySaveData() {
 }
 
 void AdminWindow::setupBookTable() const {
-    bookModel->setHorizontalHeaderLabels({"Title", "Author", "Publisher", "Year", "ISBN", "Available", "Total"});
+    bookModel->setHorizontalHeaderLabels({"书名", "作者", "出版社", "出版年份", "ISBN", "可用", "总库存"});
     ui->tableViewBooks->setModel(bookModel);
     ui->tableViewBooks->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 }
 
 void AdminWindow::setupUserTable() const {
-    userModel->setHorizontalHeaderLabels({"ID", "Name", "Group", "Borrowed Count"});
+    userModel->setHorizontalHeaderLabels({"ID", "姓名", "用户组", "借阅数量"});
     ui->tableViewUsers->setModel(userModel);
     ui->tableViewUsers->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 }
@@ -68,7 +68,7 @@ void AdminWindow::refreshBookTable() const {
             << new QStandardItem(book.getAuthor())
             << new QStandardItem(book.getPublisher())
             << new QStandardItem(QString::number(book.getPublishYear()))
-            << new QStandardItem(book.getISBN())  // ISBN用字符串显示
+            << new QStandardItem(book.getISBN())
             << new QStandardItem(QString::number(book.getAvailableCopies()))
             << new QStandardItem(QString::number(book.getTotalCopies()));
         bookModel->appendRow(row);
@@ -156,7 +156,7 @@ void AdminWindow::onDeleteBook() const {
 }
 
 void AdminWindow::onSearchBook() {
-    const QString keyword = QInputDialog::getText(this, "Search Book", "Enter title keyword:");
+    const QString keyword = QInputDialog::getText(this, "搜索图书", "输入关键字:");
     const bool showAll = keyword.trimmed().isEmpty();
 
     bookModel->removeRows(0, bookModel->rowCount());
@@ -192,7 +192,7 @@ void AdminWindow::onResetPasswordClicked() {
         return;
     }
 
-    if (QMessageBox::question(this, "确认", "确定要将该用户密码重置为 123456？") != QMessageBox::Yes)
+    if (QMessageBox::question(this, "确认", "确定要将该用户密码重置？") != QMessageBox::Yes)
         return;
 
     user->resetPassword();
@@ -241,18 +241,18 @@ void AdminWindow::showUserBorrowInfoDialog(long long userId) {
 
 void AdminWindow::onAddUser() {
     bool ok;
-    const int id = QInputDialog::getInt(this, "Add User", "User ID:", 0, 0, 999999999, 1, &ok);
+    const int id = QInputDialog::getInt(this, "新建用户", "ID:", 0, 0, 999999999, 1, &ok);
     if (!ok) return;
-    const QString name = QInputDialog::getText(this, "Add User", "Name:", QLineEdit::Normal, "", &ok);
+    const QString name = QInputDialog::getText(this, "新建用户", "姓名:", QLineEdit::Normal, "", &ok);
     if (!ok || name.isEmpty()) return;
 
     const QStringList groupOptions = {"User", "Admin"};
-    const QString groupStr = QInputDialog::getItem(this, "Add User", "Select Group:", groupOptions, 0, false, &ok);
+    const QString groupStr = QInputDialog::getItem(this, "新建用户", "选择用户组:", groupOptions, 0, false, &ok);
     if (!ok || groupStr.isEmpty()) return;
 
     Group group = (groupStr == "Admin") ? Group::Admin : Group::User;
     if (!library->registerUser(User(name.toStdString(), "123456", id, group))) {
-        QMessageBox::warning(this, "Failed", "User ID already exists.");
+        QMessageBox::warning(this, "失败", "ID 已经被占用");
         return;
     }
 
@@ -268,11 +268,11 @@ void AdminWindow::onEditUser() {
     if (!user) return;
 
     bool ok;
-    const QString name = QInputDialog::getText(this, "Edit User", "New Name:", QLineEdit::Normal, user->getName(), &ok);
+    const QString name = QInputDialog::getText(this, "编辑用户", "新姓名:", QLineEdit::Normal, user->getName(), &ok);
     if (!ok || name.isEmpty()) return;
 
     const QStringList groupOptions = {"User", "Admin"};
-    const QString groupStr = QInputDialog::getItem(this, "Edit User", "New Group:", groupOptions,
+    const QString groupStr = QInputDialog::getItem(this, "编辑用户", "新用户组:", groupOptions,
                                                    user->getGroup() == Group::Admin ? 1 : 0, false, &ok);
     if (!ok || groupStr.isEmpty()) return;
 
@@ -294,7 +294,7 @@ void AdminWindow::onDeleteUser() const {
 }
 
 void AdminWindow::onSearchUser() {
-    const QString keyword = QInputDialog::getText(this, "Search User", "Enter user name:");
+    const QString keyword = QInputDialog::getText(this, "搜索用户", "请输入用户姓名:");
     const bool showAll = keyword.trimmed().isEmpty();
 
     userModel->removeRows(0, userModel->rowCount());

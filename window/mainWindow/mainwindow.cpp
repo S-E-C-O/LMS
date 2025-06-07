@@ -19,13 +19,13 @@ MainWindow::MainWindow(Library* library, User* user, QWidget* parent)
     setCentralWidget(centralWidget);
 
     searchEdit = new QLineEdit(this);
-    searchEdit->setPlaceholderText("Enter keyword...");
+    searchEdit->setPlaceholderText("请输入关键词...");
 
-    searchButton = new QPushButton("Search", this);
+    searchButton = new QPushButton("搜索", this);
 
     tableWidget = new QTableWidget(this);
     tableWidget->setColumnCount(5);
-    tableWidget->setHorizontalHeaderLabels({"Title", "Author", "Publisher", "Year", "ISBN"});
+    tableWidget->setHorizontalHeaderLabels({"书名", "作者", "出版社", "出版年份", "ISBN"});
     tableWidget->horizontalHeader()->setStretchLastSection(true);
     tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
     tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);

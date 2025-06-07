@@ -3,7 +3,7 @@
     <class>BookEditDialog</class>
     <widget class="QDialog" name="BookEditDialog">
         <property name="windowTitle">
-            <string>Edit Book</string>
+            <string>图书信息</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout">
             <item>
@@ -19,7 +19,7 @@
                         <item row="0" column="0">
                             <widget class="QLabel" name="labelTitle">
                                 <property name="text">
-                                    <string>Title:</string>
+                                    <string>书名:</string>
                                 </property>
                             </widget>
                         </item>
@@ -30,7 +30,7 @@
                         <item row="1" column="0">
                             <widget class="QLabel" name="labelAuthor">
                                 <property name="text">
-                                    <string>Author:</string>
+                                    <string>作者:</string>
                                 </property>
                             </widget>
                         </item>
@@ -41,7 +41,7 @@
                         <item row="2" column="0">
                             <widget class="QLabel" name="labelPublisher">
                                 <property name="text">
-                                    <string>Publisher:</string>
+                                    <string>出版社:</string>
                                 </property>
                             </widget>
                         </item>
@@ -52,7 +52,7 @@
                         <item row="3" column="0">
                             <widget class="QLabel" name="labelYear">
                                 <property name="text">
-                                    <string>Year:</string>
+                                    <string>出版年份:</string>
                                 </property>
                             </widget>
                         </item>
@@ -74,7 +74,7 @@
                         <item row="5" column="0">
                             <widget class="QLabel" name="labelTotal">
                                 <property name="text">
-                                    <string>Total Copies:</string>
+                                    <string>总库存:</string>
                                 </property>
                             </widget>
                         </item>
@@ -103,7 +103,7 @@
                     <item>
                         <widget class="QPushButton" name="buttonBoxOk">
                             <property name="text">
-                                <string>OK</string>
+                                <string>确认</string>
                             </property>
                             <property name="default">
                                 <bool>true</bool>
@@ -116,7 +116,7 @@
                     <item>
                         <widget class="QPushButton" name="buttonBoxCancel">
                             <property name="text">
-                                <string>Cancel</string>
+                                <string>取消</string>
                             </property>
                             <property name="autoDefault">
                                 <bool>false</bool>
