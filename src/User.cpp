@@ -128,6 +128,6 @@ void User::deserialize(QDataStream& in) {
         in >> timeVal;
 
         borrowedBooks.push_back(isbn);
-        borrowedTime[isbn] = static_cast<std::time_t>(timeVal);
+        borrowedTime[isbn] = timeVal;
     }
 }

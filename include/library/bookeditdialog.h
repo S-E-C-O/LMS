@@ -15,10 +15,10 @@ class BookEditDialog : public QDialog {
 
 public:
     explicit BookEditDialog(QWidget *parent = nullptr);
-    ~BookEditDialog();
+    ~BookEditDialog() override;
 
     void setBookInfo(const QString &title, const QString &author, const QString &publisher,
-                     long year, const QString &isbn, int totalCopies);
+                     long year, const QString &isbn, int totalCopies) const;
 
     QString getTitle() const;
     QString getAuthor() const;

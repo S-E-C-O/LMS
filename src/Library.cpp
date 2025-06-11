@@ -7,7 +7,6 @@
 #include <QDataStream>
 #include <QDebug>
 #include <algorithm>
-#include <iostream>
 #include <stdexcept>
 
 #include "CompressionUtil.h"

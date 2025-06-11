@@ -20,10 +20,14 @@ public:
 
 private slots:
     void onSearchClicked() const;
+    void onBorrowClicked();
+    void onReturnClicked();
 
 private:
     QLineEdit* searchEdit;
     QPushButton* searchButton;
+    QPushButton* borrowButton;
+    QPushButton* returnButton;
     QTableWidget* tableWidget;
     Library* library;
     User* currentUser;

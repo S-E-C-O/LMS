@@ -9,6 +9,6 @@
 class CompressionUtil {
 public:
     static QByteArray compressObject(const std::function<void(QDataStream&)> &serializer);
-    static void decompressObject(QByteArray &compressed, const std::function<void(QDataStream &)> &deserializer);
+    static void decompressObject(const QByteArray &compressed, const std::function<void(QDataStream &)> &deserializer);
 };
 

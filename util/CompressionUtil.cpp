@@ -11,7 +11,7 @@ QByteArray CompressionUtil::compressObject(const std::function<void(QDataStream&
     return qCompress(rawData);
 }
 
-void CompressionUtil::decompressObject(QByteArray &compressed, const std::function<void(QDataStream&)> &deserializer) {
+void CompressionUtil::decompressObject(const QByteArray &compressed, const std::function<void(QDataStream&)> &deserializer) {
     QByteArray rawData = qUncompress(compressed);
     if (rawData.isEmpty()) throw std::runtime_error("Decompression failed");
 
