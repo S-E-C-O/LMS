@@ -156,6 +156,7 @@ bool Library::borrowBook(long userId, const QString& ISBN) {
     if (!user->borrowBook(ISBN))
         return false;
     book->decreaseAvailableCopies();
+    saveToFile(user_data_file_path, book_data_file_path);
     return true;
 }
 
@@ -167,6 +168,7 @@ bool Library::returnBook(long userId, const QString& ISBN) {
     if (!user->returnBook(ISBN))
         return false;
     book->increaseAvailableCopies();
+    saveToFile(user_data_file_path, book_data_file_path);
     return true;
 }
 
