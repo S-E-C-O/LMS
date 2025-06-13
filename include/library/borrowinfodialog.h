@@ -13,8 +13,11 @@ namespace Ui { class BorrowInfoDialog; }
 QT_END_NAMESPACE
 
 struct BorrowEntry {
-    const QString& isbn;
+    QString isbn;
     std::time_t borrowTime;
+
+    BorrowEntry(const QString& isbn, std::time_t time)
+        : isbn(isbn), borrowTime(time) {}
 };
 
 class BorrowInfoDialog : public QDialog {
