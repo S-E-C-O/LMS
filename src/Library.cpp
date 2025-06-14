@@ -60,7 +60,7 @@ User* Library::loginUser(const long id, const std::string_view password) {
     return nullptr;
 }
 
-User* Library::findUserById(long id) {
+User* Library::findUserById(const long long id) {
     for (auto& user : users) {
         if (user.getId() == id)
             return &user;
@@ -159,7 +159,7 @@ std::vector<Book> Library::searchBooksByPublisher(const std::string_view keyword
     return results;
 }
 
-bool Library::borrowBook(long userId, const QString& ISBN) {
+bool Library::borrowBook(long long userId, const QString& ISBN) {
     User* user = findUserById(userId);
     Book* book = findBookByISBN(ISBN);
     if (!user || !book || book->getAvailableCopies() <= 0)
@@ -171,7 +171,7 @@ bool Library::borrowBook(long userId, const QString& ISBN) {
     return true;
 }
 
-bool Library::returnBook(long userId, const QString& ISBN) {
+bool Library::returnBook(long long userId, const QString& ISBN) {
     User* user = findUserById(userId);
     Book* book = findBookByISBN(ISBN);
     if (!user || !book)
@@ -275,13 +275,11 @@ void Library::loadFromFile(const std::filesystem::path &userFile, const std::fil
 
 std::vector<Book> Library::getBooksBorrowedByUser(int userId) {
     std::vector<Book> result;
-    auto user = findUserById(userId);
+    const auto user = findUserById(userId);
     if (!user) return result;
 
-    const auto& borrowedIsbns = user->getBorrowedBooks();
-    for (const auto& isbn : borrowedIsbns) {
-        auto book = findBookByISBN(isbn);
-        if (book) result.push_back(*book);
+    for (const auto& borrowedISBNs = user->getBorrowedBooks(); const auto& isbn : borrowedISBNs) {
+        if (const auto book = findBookByISBN(isbn)) result.push_back(*book);
     }
     return result;
 }

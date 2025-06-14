@@ -54,5 +54,5 @@ private:
     void refreshUserTable() const;
     void showUserBorrowInfoDialog(long long userId);
 
-    bool isValidISBN(const QString& isbn) const;
+    [[nodiscard]] static bool isValidISBN(const QString& isbn);
 };

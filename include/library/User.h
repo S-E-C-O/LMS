@@ -31,13 +31,13 @@ public:
     User(std::string_view name, std::string_view password, long id, Group group = Group::User);
 
     // 核心功能
-    [[nodiscard]] long getId() const;
+    [[nodiscard]] long long getId() const;
     [[nodiscard]] const char* getName() const;
     [[nodiscard]] const char* getPassword() const;
     [[nodiscard]] Group getGroup() const;
     [[nodiscard]] std::vector<QString> getBorrowedBooks() const;
 
-    std::optional<std::time_t> getBorrowTime(const QString& ISBN) const;
+    [[nodiscard]] std::optional<std::time_t> getBorrowTime(const QString& ISBN) const;
 
     [[nodiscard]] bool checkPassword(std::string_view input) const;
     bool changePassword(std::string_view oldPwd, std::string_view newPwd);

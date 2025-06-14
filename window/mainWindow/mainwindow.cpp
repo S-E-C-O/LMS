@@ -5,7 +5,6 @@
 // You may need to build the project (run Qt uic code generator) to get "ui_MainWindow.h" resolved
 
 #include "mainwindow.h"
-#include <QLineEdit>
 #include <QPushButton>
 #include <QTableWidget>
 #include <QVBoxLayout>
@@ -126,7 +125,7 @@ void MainWindow::onReturnClicked() {
     }
 }
 
-void MainWindow::onViewBorrowedClicked() {
+void MainWindow::onViewBorrowedClicked() const {
     const auto& borrowedBooks = library->getBooksBorrowedByUser(currentUser->getId());
     populateTable(borrowedBooks);
 }

@@ -10,7 +10,7 @@
 class QLineEdit;
 class QPushButton;
 
-class LoginWindow : public QWidget {
+class LoginWindow final : public QWidget {
     Q_OBJECT
 
 public:

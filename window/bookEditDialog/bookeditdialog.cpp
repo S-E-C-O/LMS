@@ -19,7 +19,7 @@ BookEditDialog::~BookEditDialog() {
 }
 
 void BookEditDialog::setBookInfo(const QString& title, const QString& author, const QString& publisher,
-                                 long year, const QString& isbn, int totalCopies) const {
+                                 const long year, const QString& isbn, const int totalCopies) const {
     ui->lineEditTitle->setText(title);
     ui->lineEditAuthor->setText(author);
     ui->lineEditPublisher->setText(publisher);

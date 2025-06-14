@@ -107,10 +107,12 @@ void Book::increaseAvailableCopies() {
 bool Book::isValidISBN() const {
     // 去除ISBN中的连字符和空格
     QString cleanISBN = ISBN;
-    cleanISBN.remove(QRegularExpression("[-\\s]"));
+    const static QRegularExpression re(R"([-\s])");
+    cleanISBN.remove(re);
 
     // ISBN-13 校验
-    if (cleanISBN.length() == 13 && cleanISBN.contains(QRegularExpression("^\\d{13}$"))) {
+    const static QRegularExpression re13(R"(^\d{13}$)");
+    if (cleanISBN.length() == 13 && cleanISBN.contains(re13)) {
         int sum = 0;
         for (int i = 0; i < 12; ++i) {
             int digit = cleanISBN[i].digitValue();
@@ -122,14 +124,15 @@ bool Book::isValidISBN() const {
     }
 
     // ISBN-10 校验
-    if (cleanISBN.length() == 10 && cleanISBN.contains(QRegularExpression("^[0-9]{9}[0-9Xx]$"))) {
+    const static QRegularExpression re10(R"(^[0-9]{9}[0-9Xx]$)");
+    if (cleanISBN.length() == 10 && cleanISBN.contains(re10)) {
         int sum = 0;
         for (int i = 0; i < 9; ++i) {
             int digit = cleanISBN[i].digitValue();
             if (digit < 0) return false;
             sum += (10 - i) * digit;
         }
-        char lastChar = cleanISBN[9].toUpper().toLatin1();
+        const char lastChar = cleanISBN[9].toUpper().toLatin1();
         sum += (lastChar == 'X') ? 10 : (lastChar - '0');
         return (sum % 11) == 0;
     }

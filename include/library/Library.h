@@ -26,7 +26,7 @@ public:
     bool deleteUser(long id);
     bool updateUser(const User& updatedUser);
     User* loginUser(long id, std::string_view password);
-    User* findUserById(long id);
+    User* findUserById(long long id);
     [[nodiscard]] const std::vector<User>& getAllUsers() const;
 
     // 图书操作
@@ -36,7 +36,7 @@ public:
     Book* findBookByISBN(const QString& ISBN);
     [[nodiscard]] const std::vector<Book>& getAllBooks() const;
 
-    std::vector<Book> searchBooksByISBN(std::string_view keyword) const;
+    [[nodiscard]] std::vector<Book> searchBooksByISBN(std::string_view keyword) const;
     std::vector<Book> getBooksBorrowedByUser(int userId);
 
     // 图书搜索
@@ -44,8 +44,8 @@ public:
     [[nodiscard]] std::vector<Book> searchBooksByAuthor(std::string_view keyword) const;
     [[nodiscard]] std::vector<Book> searchBooksByPublisher(std::string_view keyword) const;
 
-    bool borrowBook(long userId, const QString& ISBN);
-    bool returnBook(long userId, const QString& ISBN);
+    bool borrowBook(long long userId, const QString& ISBN);
+    bool returnBook(long long userId, const QString &ISBN);
     bool isBookBorrowedByUser(int userId, const std::string& isbn);
     // 数据持久化
     void saveToFile(const std::filesystem::path &userFile, const std::filesystem::path &bookFile) const;

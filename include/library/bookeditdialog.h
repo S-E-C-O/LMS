@@ -20,12 +20,12 @@ public:
     void setBookInfo(const QString &title, const QString &author, const QString &publisher,
                      long year, const QString &isbn, int totalCopies) const;
 
-    QString getTitle() const;
-    QString getAuthor() const;
-    QString getPublisher() const;
-    long getYear() const;
-    QString getISBN() const;
-    int getTotal() const;
+    [[nodiscard]] QString getTitle() const;
+    [[nodiscard]] QString getAuthor() const;
+    [[nodiscard]] QString getPublisher() const;
+    [[nodiscard]] long getYear() const;
+    [[nodiscard]] QString getISBN() const;
+    [[nodiscard]] int getTotal() const;
 
 private:
     Ui::BookEditDialog *ui;

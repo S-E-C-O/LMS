@@ -6,6 +6,7 @@
 
 #include <QDialog>
 #include <QTableWidget>
+#include <utility>
 #include <vector>
 
 QT_BEGIN_NAMESPACE
@@ -16,8 +17,8 @@ struct BorrowEntry {
     QString isbn;
     std::time_t borrowTime;
 
-    BorrowEntry(const QString& isbn, std::time_t time)
-        : isbn(isbn), borrowTime(time) {}
+    BorrowEntry(QString isbn, const std::time_t time)
+        : isbn(std::move(isbn)), borrowTime(time) {}
 };
 
 class BorrowInfoDialog : public QDialog {
@@ -25,9 +26,9 @@ class BorrowInfoDialog : public QDialog {
 
 public:
     explicit BorrowInfoDialog(QWidget* parent = nullptr);
-    ~BorrowInfoDialog();
+    ~BorrowInfoDialog() override;
 
-    void setBorrowList(const std::vector<BorrowEntry>& list);
+    void setBorrowList(const std::vector<BorrowEntry>& list) const;
 
 private:
     Ui::BorrowInfoDialog* ui;

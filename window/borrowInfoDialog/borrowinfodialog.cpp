@@ -23,7 +23,7 @@ BorrowInfoDialog::~BorrowInfoDialog() {
     delete ui;
 }
 
-void BorrowInfoDialog::setBorrowList(const std::vector<BorrowEntry>& list) {
+void BorrowInfoDialog::setBorrowList(const std::vector<BorrowEntry>& list) const {
     ui->tableWidget->setRowCount(static_cast<int>(list.size()));
     for (int i = 0; i < static_cast<int>(list.size()); ++i) {
         const auto& entry = list[i];

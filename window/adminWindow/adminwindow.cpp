@@ -90,9 +90,9 @@ void AdminWindow::refreshUserTable() const {
     }
 }
 
-bool AdminWindow::isValidISBN(const QString& isbn) const {
+bool AdminWindow::isValidISBN(const QString& isbn) {
     // 简单校验：10位或13位数字，10位最后允许是X
-    QRegularExpression re("^(\\d{10}|\\d{9}[Xx]|\\d{13})$");
+    const static QRegularExpression re(R"(^(\d{10}|\d{9}[Xx]|\d{13})$)");
     return re.match(isbn).hasMatch();
 }
 
@@ -172,8 +172,7 @@ void AdminWindow::onSearchBook() {
     } else if (type == "出版社") {
         results = library->searchBooksByPublisher(keyword.toStdString());
     } else if (type == "ISBN") {
-        Book* book = library->findBookByISBN(keyword);
-        if (book) results.push_back(*book);
+        if (Book* book = library->findBookByISBN(keyword)) results.push_back(*book);
     }
 
     for (const auto& book : results) {
@@ -243,7 +242,7 @@ void AdminWindow::showUserBorrowInfoDialog(long long userId) {
     std::vector<BorrowEntry> borrowList;
     for (const auto& isbn : user->getBorrowedBooks()) {
         if (auto borrowTimeOpt = user->getBorrowTime(isbn)) {
-            borrowList.push_back({isbn, *borrowTimeOpt});
+            borrowList.emplace_back(isbn, *borrowTimeOpt);
         }
     }
 

@@ -22,7 +22,7 @@ User::User(std::string_view name, std::string_view password, long id, Group grou
     this->password[password.size()] = '\0';
 }
 
-long User::getId() const { return id; }
+long long User::getId() const { return id; }
 const char* User::getName() const { return name; }
 const char* User::getPassword() const { return password; }
 Group User::getGroup() const { return group; }

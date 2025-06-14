@@ -13,7 +13,7 @@ class QPushButton;
 class QTableWidget;
 class User;
 
-class MainWindow : public QMainWindow {
+class MainWindow final : public QMainWindow {
     Q_OBJECT
 
 public:
@@ -23,7 +23,7 @@ private slots:
     void onSearchClicked() const;
     void onBorrowClicked();
     void onReturnClicked();
-    void onViewBorrowedClicked();
+    void onViewBorrowedClicked() const;
     void onChangePasswordClicked();
 
 private:
