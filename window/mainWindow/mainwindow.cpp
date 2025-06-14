@@ -32,8 +32,8 @@ MainWindow::MainWindow(Library* library, User* user, QWidget* parent)
     radioTitle->setChecked(true);
 
     tableWidget = new QTableWidget(this);
-    tableWidget->setColumnCount(6);
-    tableWidget->setHorizontalHeaderLabels({"书名", "作者", "出版社", "出版年份", "ISBN", "可用数量"});
+    tableWidget->setColumnCount(7);
+    tableWidget->setHorizontalHeaderLabels({"书名", "作者", "出版社", "出版年份", "ISBN", "可用数量", "是否已借阅"});
     tableWidget->horizontalHeader()->setStretchLastSection(true);
     tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
     tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -123,5 +123,7 @@ void MainWindow::populateTable(const std::vector<Book>& books) const {
         tableWidget->setItem(row, 3, new QTableWidgetItem(QString::number(book.getPublishYear())));
         tableWidget->setItem(row, 4, new QTableWidgetItem(book.getISBN()));
         tableWidget->setItem(row, 5, new QTableWidgetItem(QString::number(book.getAvailableCopies())));
+        bool borrowed = library->isBookBorrowedByUser(currentUser->getId(), book.getISBN().toStdString());
+        tableWidget->setItem(row, 6, new QTableWidgetItem(borrowed ? "是" : "否"));
     }
 }

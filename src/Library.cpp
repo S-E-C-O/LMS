@@ -182,6 +182,13 @@ bool Library::returnBook(long userId, const QString& ISBN) {
     saveToFile(user_data_file_path, book_data_file_path);
     return true;
 }
+bool Library::isBookBorrowedByUser(int userId, const std::string& isbn)  {
+    auto user = findUserById(userId);
+    if (!user) return false;
+    const auto& borrowedBooks = user->getBorrowedBooks(); // 假设返回 vector<string> 或 set<string>
+    return std::find(borrowedBooks.begin(), borrowedBooks.end(), isbn) != borrowedBooks.end();
+}
+
 
 void Library::saveToFile(const std::filesystem::path &userFile, const std::filesystem::path &bookFile) const {
     QFile userQFile(QString::fromStdString(userFile.string()));

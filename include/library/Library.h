@@ -45,7 +45,7 @@ public:
 
     bool borrowBook(long userId, const QString& ISBN);
     bool returnBook(long userId, const QString& ISBN);
-
+    bool isBookBorrowedByUser(int userId, const std::string& isbn);
     // 数据持久化
     void saveToFile(const std::filesystem::path &userFile, const std::filesystem::path &bookFile) const;
     void loadFromFile(const std::filesystem::path &userFile, const std::filesystem::path &bookFile);

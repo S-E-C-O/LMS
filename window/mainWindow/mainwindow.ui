@@ -72,6 +72,11 @@
                                 <string>Available</string>
                             </property>
                         </column>
+                        <column>
+                            <property name="text">
+                                <string>Borrowed</string>
+                            </property>
+                        </column>
                     </widget>
                 </item>
                 <item>
