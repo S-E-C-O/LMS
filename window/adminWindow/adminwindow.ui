@@ -10,6 +10,27 @@
         <widget class="QWidget" name="centralwidget">
             <layout class="QVBoxLayout">
                 <item>
+                    <layout class="QHBoxLayout">
+                        <item>
+                            <spacer name="horizontalSpacer">
+                                <property name="orientation">
+                                    <enum>Qt::Horizontal</enum>
+                                </property>
+                                <property name="sizeType">
+                                    <enum>QSizePolicy::Expanding</enum>
+                                </property>
+                            </spacer>
+                        </item>
+                        <item>
+                            <widget class="QLabel" name="welcomeLabel">
+                                <property name="text">
+                                    <string>你好，管理员</string>
+                                </property>
+                            </widget>
+                        </item>
+                    </layout>
+                </item>
+                <item>
                     <widget class="QTabWidget" name="tabWidget">
                         <!-- 书籍管理 Tab -->
                         <widget class="QWidget" name="tabBooks">

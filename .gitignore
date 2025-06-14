@@ -1,5 +1,6 @@
 .idea
 .editorconfig
 cmake-build-debug
+release
 
 data/*.dat

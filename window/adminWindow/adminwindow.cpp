@@ -20,6 +20,11 @@ AdminWindow::AdminWindow(Library* library, User* user, QWidget* parent)
     const QIcon icon(":/resources/favicon.png");
     this->setWindowIcon(icon);
     ui->setupUi(this);
+
+    if (currentUser) {
+        ui->welcomeLabel->setText(QString("你好，%1").arg(currentUser->getName()));
+    }
+
     setupBookTable();
     setupUserTable();
     refreshBookTable();

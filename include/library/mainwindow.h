@@ -8,10 +8,11 @@
 #include <QRadioButton>
 #include "Library.h"
 
-class QLineEdit;
-class QPushButton;
-class QTableWidget;
-class User;
+class QComboBox;
+QT_BEGIN_NAMESPACE
+namespace Ui { class MainWindow; }
+QT_END_NAMESPACE
+
 
 class MainWindow final : public QMainWindow {
     Q_OBJECT
@@ -27,18 +28,10 @@ private slots:
     void onChangePasswordClicked();
 
 private:
-    QLineEdit* searchEdit;
-    QRadioButton* radioTitle;
-    QRadioButton* radioAuthor;
-    QRadioButton* radioISBN;
-    QPushButton* searchButton;
-    QPushButton* borrowButton;
-    QPushButton* returnButton;
-    QPushButton* viewBorrowedButton;
-    QPushButton* changePasswordButton;
-    QTableWidget* tableWidget;
+    Ui::MainWindow* ui;
     Library* library;
     User* currentUser;
+    QComboBox* searchTypeCombo;
 
     void populateTable(const std::vector<Book>& books) const;
     void trySaveData();

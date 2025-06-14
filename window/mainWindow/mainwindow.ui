@@ -16,12 +16,52 @@
         <widget class="QWidget" name="centralwidget">
             <layout class="QVBoxLayout" name="verticalLayout">
                 <item>
+                    <layout class="QHBoxLayout" name="topLayout">
+                        <item>
+                            <spacer name="horizontalSpacer">
+                                <property name="orientation">
+                                    <enum>Qt::Horizontal</enum>
+                                </property>
+                                <property name="sizeType">
+                                    <enum>QSizePolicy::Expanding</enum>
+                                </property>
+                            </spacer>
+                        </item>
+                        <item>
+                            <widget class="QLabel" name="welcomeLabel">
+                                <property name="text">
+                                    <string>你好，用户</string>
+                                </property>
+                            </widget>
+                        </item>
+                    </layout>
+                </item>
+                <item>
                     <layout class="QHBoxLayout" name="searchLayout">
                         <item>
                             <widget class="QLineEdit" name="searchEdit">
                                 <property name="placeholderText">
                                     <string>Enter keyword...</string>
                                 </property>
+                            </widget>
+                        </item>
+                        <item>
+                            <widget class="QComboBox" name="searchTypeCombo">
+                                <item>
+                                    <property name="text">
+                                        <string>书名</string>
+                                    </property>
+                                </item>
+                                <item>
+                                    <property name="text">
+                                        <string>作者</string>
+                                    </property>
+                                </item>
+                                <item>
+                                    <property name="text">
+                                        <string>ISBN</string>
+                                    </property>
+                                </item>
                             </widget>
                         </item>
                         <item>
@@ -44,22 +84,22 @@
                     <widget class="QTableWidget" name="tableWidget">
                         <column>
                             <property name="text">
-                                <string>Title</string>
+                                <string>书名</string>
                             </property>
                         </column>
                         <column>
                             <property name="text">
-                                <string>Author</string>
+                                <string>作者</string>
                             </property>
                         </column>
                         <column>
                             <property name="text">
-                                <string>Publisher</string>
+                                <string>出版社</string>
                             </property>
                         </column>
                         <column>
                             <property name="text">
-                                <string>Year</string>
+                                <string>出版年份</string>
                             </property>
                         </column>
                         <column>
@@ -69,12 +109,12 @@
                         </column>
                         <column>
                             <property name="text">
-                                <string>Available</string>
+                                <string>可用数量</string>
                             </property>
                         </column>
                         <column>
                             <property name="text">
-                                <string>Borrowed</string>
+                                <string>是否已借阅</string>
                             </property>
                         </column>
                     </widget>
@@ -102,16 +142,8 @@
                                 </property>
                             </widget>
                         </item>
-                        <item>
-                            <widget class="QPushButton" name="changePasswordButton">
-                                <property name="text">
-                                    <string>修改密码</string>
-                                </property>
-                            </widget>
-                        </item>
                     </layout>
                 </item>
-
             </layout>
         </widget>
         <widget class="QMenuBar" name="menubar"/>
