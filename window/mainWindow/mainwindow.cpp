@@ -25,6 +25,7 @@ MainWindow::MainWindow(Library* library, User* user, QWidget* parent)
     searchButton = new QPushButton("搜索", this);
     borrowButton = new QPushButton("借阅", this);
     returnButton = new QPushButton("归还", this);
+    viewBorrowedButton = new QPushButton("查看已借阅图书", this);
 
     radioTitle = new QRadioButton("书名", this);
     radioAuthor = new QRadioButton("作者", this);
@@ -53,11 +54,12 @@ MainWindow::MainWindow(Library* library, User* user, QWidget* parent)
     buttonLayout->addWidget(borrowButton);
     buttonLayout->addWidget(returnButton);
     layout->addLayout(buttonLayout);
+    layout->addWidget(viewBorrowedButton);
 
     connect(searchButton, &QPushButton::clicked, this, &MainWindow::onSearchClicked);
     connect(borrowButton, &QPushButton::clicked, this, &MainWindow::onBorrowClicked);
     connect(returnButton, &QPushButton::clicked, this, &MainWindow::onReturnClicked);
-
+    connect(viewBorrowedButton, &QPushButton::clicked, this, &MainWindow::onViewBorrowedClicked);
 
     populateTable(library->getAllBooks());
 }
@@ -111,6 +113,11 @@ void MainWindow::onReturnClicked() {
     }
 }
 
+void MainWindow::onViewBorrowedClicked() {
+    const auto& borrowedBooks = library->getBooksBorrowedByUser(currentUser->getId());
+    populateTable(borrowedBooks);
+}
+
 
 void MainWindow::populateTable(const std::vector<Book>& books) const {
     tableWidget->setRowCount(static_cast<int>(books.size()));
@@ -123,6 +130,7 @@ void MainWindow::populateTable(const std::vector<Book>& books) const {
         tableWidget->setItem(row, 3, new QTableWidgetItem(QString::number(book.getPublishYear())));
         tableWidget->setItem(row, 4, new QTableWidgetItem(book.getISBN()));
         tableWidget->setItem(row, 5, new QTableWidgetItem(QString::number(book.getAvailableCopies())));
+
         bool borrowed = library->isBookBorrowedByUser(currentUser->getId(), book.getISBN().toStdString());
         tableWidget->setItem(row, 6, new QTableWidgetItem(borrowed ? "是" : "否"));
     }

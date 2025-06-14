@@ -37,6 +37,7 @@ public:
     [[nodiscard]] const std::vector<Book>& getAllBooks() const;
 
     std::vector<Book> searchBooksByISBN(std::string_view keyword) const;
+    std::vector<Book> getBooksBorrowedByUser(int userId);
 
     // 图书搜索
     [[nodiscard]] std::vector<Book> searchBooksByTitle(std::string_view keyword) const;

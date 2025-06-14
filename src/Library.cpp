@@ -272,3 +272,16 @@ void Library::loadFromFile(const std::filesystem::path &userFile, const std::fil
         bookQFile.close();
     }
 }
+
+std::vector<Book> Library::getBooksBorrowedByUser(int userId) {
+    std::vector<Book> result;
+    auto user = findUserById(userId);
+    if (!user) return result;
+
+    const auto& borrowedIsbns = user->getBorrowedBooks();
+    for (const auto& isbn : borrowedIsbns) {
+        auto book = findBookByISBN(isbn);
+        if (book) result.push_back(*book);
+    }
+    return result;
+}

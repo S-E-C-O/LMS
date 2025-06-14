@@ -23,6 +23,7 @@ private slots:
     void onSearchClicked() const;
     void onBorrowClicked();
     void onReturnClicked();
+    void onViewBorrowedClicked();
 
 private:
     QLineEdit* searchEdit;
@@ -32,6 +33,7 @@ private:
     QPushButton* searchButton;
     QPushButton* borrowButton;
     QPushButton* returnButton;
+    QPushButton* viewBorrowedButton;
     QTableWidget* tableWidget;
     Library* library;
     User* currentUser;

@@ -95,6 +95,13 @@
                                 </property>
                             </widget>
                         </item>
+                        <item>
+                            <widget class="QPushButton" name="viewBorrowedButton">
+                                <property name="text">
+                                    <string>查看已借阅图书</string>
+                                </property>
+                            </widget>
+                        </item>
                     </layout>
                 </item>
 
