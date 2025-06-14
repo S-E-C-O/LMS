@@ -120,6 +120,17 @@ const std::vector<Book>& Library::getAllBooks() const {
     return books;
 }
 
+std::vector<Book> Library::searchBooksByISBN(const std::string_view keyword) const {
+    std::vector<Book> results;
+    for (const auto& book : books) {
+        if (std::string(book.getISBN().toStdString()).find(keyword) != std::string::npos) {
+            results.push_back(book);
+        }
+    }
+    return results;
+}
+
+
 std::vector<Book> Library::searchBooksByTitle(const std::string_view keyword) const {
     if (keyword.empty()) return books;
     std::vector<Book> results;

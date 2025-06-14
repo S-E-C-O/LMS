@@ -13,13 +13,23 @@
                     <widget class="QTabWidget" name="tabWidget">
                         <!-- 书籍管理 Tab -->
                         <widget class="QWidget" name="tabBooks">
-                            <attribute name="title"><string>书籍管理</string></attribute>
+                            <attribute name="title">
+                                <string>书籍管理</string>
+                            </attribute>
                             <layout class="QVBoxLayout">
                                 <item>
                                     <widget class="QTableView" name="tableViewBooks"/>
                                 </item>
                                 <item>
                                     <layout class="QHBoxLayout">
+                                        <item>
+                                            <widget class="QComboBox" name="comboSearchBookType">
+                                                <item><property name="text"><string>书名</string></property></item>
+                                                <item><property name="text"><string>作者</string></property></item>
+                                                <item><property name="text"><string>出版社</string></property></item>
+                                                <item><property name="text"><string>ISBN</string></property></item>
+                                            </widget>
+                                        </item>
                                         <item>
                                             <widget class="QPushButton" name="btnAddBook">
                                                 <property name="text"><string>新增</string></property>
@@ -46,13 +56,21 @@
                         </widget>
                         <!-- 用户管理 Tab -->
                         <widget class="QWidget" name="tabUsers">
-                            <attribute name="title"><string>用户管理</string></attribute>
+                            <attribute name="title">
+                                <string>用户管理</string>
+                            </attribute>
                             <layout class="QVBoxLayout">
                                 <item>
                                     <widget class="QTableView" name="tableViewUsers"/>
                                 </item>
                                 <item>
                                     <layout class="QHBoxLayout">
+                                        <item>
+                                            <widget class="QComboBox" name="comboSearchUserType">
+                                                <item><property name="text"><string>ID</string></property></item>
+                                                <item><property name="text"><string>姓名</string></property></item>
+                                            </widget>
+                                        </item>
                                         <item>
                                             <widget class="QPushButton" name="btnAddUser">
                                                 <property name="text"><string>新增</string></property>

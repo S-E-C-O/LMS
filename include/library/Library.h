@@ -36,6 +36,8 @@ public:
     Book* findBookByISBN(const QString& ISBN);
     [[nodiscard]] const std::vector<Book>& getAllBooks() const;
 
+    std::vector<Book> searchBooksByISBN(std::string_view keyword) const;
+
     // 图书搜索
     [[nodiscard]] std::vector<Book> searchBooksByTitle(std::string_view keyword) const;
     [[nodiscard]] std::vector<Book> searchBooksByAuthor(std::string_view keyword) const;

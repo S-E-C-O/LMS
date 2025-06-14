@@ -157,22 +157,33 @@ void AdminWindow::onDeleteBook() const {
 
 void AdminWindow::onSearchBook() {
     const QString keyword = QInputDialog::getText(this, "搜索图书", "输入关键字:");
-    const bool showAll = keyword.trimmed().isEmpty();
-
+    const QString type = ui->comboSearchBookType->currentText();
     bookModel->removeRows(0, bookModel->rowCount());
 
-    for (const auto& book : library->getAllBooks()) {
-        if (showAll || QString::fromStdString(book.getTitle()).contains(keyword, Qt::CaseInsensitive)) {
-            QList<QStandardItem*> row;
-            row << new QStandardItem(book.getTitle())
-                << new QStandardItem(book.getAuthor())
-                << new QStandardItem(book.getPublisher())
-                << new QStandardItem(QString::number(book.getPublishYear()))
-                << new QStandardItem(book.getISBN())
-                << new QStandardItem(QString::number(book.getAvailableCopies()))
-                << new QStandardItem(QString::number(book.getTotalCopies()));
-            bookModel->appendRow(row);
-        }
+    std::vector<Book> results;
+    if (keyword.trimmed().isEmpty()) {
+        results = library->getAllBooks();
+    } else if (type == "书名") {
+        results = library->searchBooksByTitle(keyword.toStdString());
+    } else if (type == "作者") {
+        results = library->searchBooksByAuthor(keyword.toStdString());
+    } else if (type == "出版社") {
+        results = library->searchBooksByPublisher(keyword.toStdString());
+    } else if (type == "ISBN") {
+        Book* book = library->findBookByISBN(keyword);
+        if (book) results.push_back(*book);
+    }
+
+    for (const auto& book : results) {
+        QList<QStandardItem*> row;
+        row << new QStandardItem(book.getTitle())
+            << new QStandardItem(book.getAuthor())
+            << new QStandardItem(book.getPublisher())
+            << new QStandardItem(QString::number(book.getPublishYear()))
+            << new QStandardItem(book.getISBN())
+            << new QStandardItem(QString::number(book.getAvailableCopies()))
+            << new QStandardItem(QString::number(book.getTotalCopies()));
+        bookModel->appendRow(row);
     }
 }
 
@@ -294,13 +305,21 @@ void AdminWindow::onDeleteUser() const {
 }
 
 void AdminWindow::onSearchUser() {
-    const QString keyword = QInputDialog::getText(this, "搜索用户", "请输入用户姓名:");
-    const bool showAll = keyword.trimmed().isEmpty();
-
+    const QString keyword = QInputDialog::getText(this, "搜索用户", "请输入关键字:");
+    const QString type = ui->comboSearchUserType->currentText();
     userModel->removeRows(0, userModel->rowCount());
 
     for (const auto& user : library->getAllUsers()) {
-        if (showAll || QString::fromStdString(user.getName()).contains(keyword, Qt::CaseInsensitive)) {
+        bool match = false;
+        if (keyword.trimmed().isEmpty()) {
+            match = true;
+        } else if (type == "ID") {
+            match = QString::number(user.getId()).contains(keyword);
+        } else if (type == "姓名") {
+            match = QString::fromStdString(user.getName()).contains(keyword, Qt::CaseInsensitive);
+        }
+
+        if (match) {
             QString group = user.getGroup() == Group::Admin ? "Admin" : "User";
             userModel->appendRow({
                 new QStandardItem(QString::number(user.getId())),

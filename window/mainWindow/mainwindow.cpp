@@ -26,6 +26,11 @@ MainWindow::MainWindow(Library* library, User* user, QWidget* parent)
     borrowButton = new QPushButton("借阅", this);
     returnButton = new QPushButton("归还", this);
 
+    radioTitle = new QRadioButton("书名", this);
+    radioAuthor = new QRadioButton("作者", this);
+    radioISBN = new QRadioButton("ISBN", this);
+    radioTitle->setChecked(true);
+
     tableWidget = new QTableWidget(this);
     tableWidget->setColumnCount(5);
     tableWidget->setHorizontalHeaderLabels({"书名", "作者", "出版社", "出版年份", "ISBN"});
@@ -35,9 +40,15 @@ MainWindow::MainWindow(Library* library, User* user, QWidget* parent)
 
     auto* layout = new QVBoxLayout(centralWidget);
     auto* buttonLayout = new QHBoxLayout;
-    layout->addWidget(searchEdit);
-    layout->addWidget(searchButton);
     layout->addWidget(tableWidget);
+
+    auto* searchLayout = new QHBoxLayout;
+    searchLayout->addWidget(searchEdit);
+    searchLayout->addWidget(searchButton);
+    searchLayout->addWidget(radioTitle);
+    searchLayout->addWidget(radioAuthor);
+    searchLayout->addWidget(radioISBN);
+    layout->addLayout(searchLayout);
 
     buttonLayout->addWidget(borrowButton);
     buttonLayout->addWidget(returnButton);
@@ -52,10 +63,23 @@ MainWindow::MainWindow(Library* library, User* user, QWidget* parent)
 }
 
 void MainWindow::onSearchClicked() const {
-    const QString keyword = searchEdit->text();
-    const std::vector<Book> results = library->searchBooksByTitle(keyword.toStdString());
-    populateTable(results);
+    const QString keyword = searchEdit->text().trimmed();
+    std::vector<Book> result;
+
+    if (keyword.isEmpty()) {
+        result = library->getAllBooks();
+    } else if (radioTitle->isChecked()) {
+        result = library->searchBooksByTitle(keyword.toStdString());
+    } else if (radioAuthor->isChecked()) {
+        result = library->searchBooksByAuthor(keyword.toStdString());
+    } else if (radioISBN->isChecked()) {
+        result = library->searchBooksByISBN(keyword.toStdString());
+    }
+
+    populateTable(result);
 }
+
+
 
 void MainWindow::onBorrowClicked() {
     int row = tableWidget->currentRow();

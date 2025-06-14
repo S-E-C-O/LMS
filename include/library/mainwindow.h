@@ -5,6 +5,7 @@
 #pragma once
 
 #include <QMainWindow>
+#include <QRadioButton>
 #include "Library.h"
 
 class QLineEdit;
@@ -25,6 +26,9 @@ private slots:
 
 private:
     QLineEdit* searchEdit;
+    QRadioButton* radioTitle;
+    QRadioButton* radioAuthor;
+    QRadioButton* radioISBN;
     QPushButton* searchButton;
     QPushButton* borrowButton;
     QPushButton* returnButton;
