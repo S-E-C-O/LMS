@@ -32,8 +32,8 @@ MainWindow::MainWindow(Library* library, User* user, QWidget* parent)
     radioTitle->setChecked(true);
 
     tableWidget = new QTableWidget(this);
-    tableWidget->setColumnCount(5);
-    tableWidget->setHorizontalHeaderLabels({"书名", "作者", "出版社", "出版年份", "ISBN"});
+    tableWidget->setColumnCount(6);
+    tableWidget->setHorizontalHeaderLabels({"书名", "作者", "出版社", "出版年份", "ISBN", "可用数量"});
     tableWidget->horizontalHeader()->setStretchLastSection(true);
     tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
     tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -114,12 +114,14 @@ void MainWindow::onReturnClicked() {
 
 void MainWindow::populateTable(const std::vector<Book>& books) const {
     tableWidget->setRowCount(static_cast<int>(books.size()));
-    for (int row = 0; row < books.size(); ++row) {
+    for (int row = 0; row < books.size(); ++row)
+    {
         const Book& book = books[row];
         tableWidget->setItem(row, 0, new QTableWidgetItem(book.getTitle()));
         tableWidget->setItem(row, 1, new QTableWidgetItem(book.getAuthor()));
         tableWidget->setItem(row, 2, new QTableWidgetItem(book.getPublisher()));
         tableWidget->setItem(row, 3, new QTableWidgetItem(QString::number(book.getPublishYear())));
         tableWidget->setItem(row, 4, new QTableWidgetItem(book.getISBN()));
+        tableWidget->setItem(row, 5, new QTableWidgetItem(QString::number(book.getAvailableCopies())));
     }
 }

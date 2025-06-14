@@ -67,6 +67,11 @@
                                 <string>ISBN</string>
                             </property>
                         </column>
+                        <column>
+                            <property name="text">
+                                <string>Available</string>
+                            </property>
+                        </column>
                     </widget>
                 </item>
                 <item>
