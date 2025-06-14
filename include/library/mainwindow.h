@@ -24,6 +24,7 @@ private slots:
     void onBorrowClicked();
     void onReturnClicked();
     void onViewBorrowedClicked();
+    void onChangePasswordClicked();
 
 private:
     QLineEdit* searchEdit;
@@ -34,9 +35,11 @@ private:
     QPushButton* borrowButton;
     QPushButton* returnButton;
     QPushButton* viewBorrowedButton;
+    QPushButton* changePasswordButton;
     QTableWidget* tableWidget;
     Library* library;
     User* currentUser;
 
     void populateTable(const std::vector<Book>& books) const;
+    void trySaveData();
 };

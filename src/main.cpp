@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
         login.hide();
 
         if(user->getGroup() == Group::Admin) {
-            adminWin = new AdminWindow(&library);
+            adminWin = new AdminWindow(&library, user);
             adminWin->show();
         } else {
             mainWin = new MainWindow(&library, user);

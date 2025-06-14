@@ -102,6 +102,13 @@
                                 </property>
                             </widget>
                         </item>
+                        <item>
+                            <widget class="QPushButton" name="changePasswordButton">
+                                <property name="text">
+                                    <string>修改密码</string>
+                                </property>
+                            </widget>
+                        </item>
                     </layout>
                 </item>
 

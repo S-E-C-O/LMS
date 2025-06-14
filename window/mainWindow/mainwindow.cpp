@@ -11,6 +11,7 @@
 #include <QVBoxLayout>
 #include <QHeaderView>
 #include <QMessageBox>
+#include <QInputDialog>
 
 MainWindow::MainWindow(Library* library, User* user, QWidget* parent)
     : QMainWindow(parent), library(library), currentUser(user) {
@@ -26,6 +27,7 @@ MainWindow::MainWindow(Library* library, User* user, QWidget* parent)
     borrowButton = new QPushButton("借阅", this);
     returnButton = new QPushButton("归还", this);
     viewBorrowedButton = new QPushButton("查看已借阅图书", this);
+    changePasswordButton = new QPushButton("修改密码", this);
 
     radioTitle = new QRadioButton("书名", this);
     radioAuthor = new QRadioButton("作者", this);
@@ -55,14 +57,25 @@ MainWindow::MainWindow(Library* library, User* user, QWidget* parent)
     buttonLayout->addWidget(returnButton);
     layout->addLayout(buttonLayout);
     layout->addWidget(viewBorrowedButton);
+    layout->addWidget(changePasswordButton);
 
     connect(searchButton, &QPushButton::clicked, this, &MainWindow::onSearchClicked);
     connect(borrowButton, &QPushButton::clicked, this, &MainWindow::onBorrowClicked);
     connect(returnButton, &QPushButton::clicked, this, &MainWindow::onReturnClicked);
     connect(viewBorrowedButton, &QPushButton::clicked, this, &MainWindow::onViewBorrowedClicked);
+    connect(changePasswordButton, &QPushButton::clicked, this, &MainWindow::onChangePasswordClicked);
 
     populateTable(library->getAllBooks());
 }
+
+void MainWindow::trySaveData() {
+    try {
+        library->saveToFile(library->getDataFilePaths()[0], library->getDataFilePaths()[1]);
+    } catch (const std::exception& e) {
+        QMessageBox::critical(this, "保存失败", e.what());
+    }
+}
+
 
 void MainWindow::onSearchClicked() const {
     const QString keyword = searchEdit->text().trimmed();
@@ -134,4 +147,27 @@ void MainWindow::populateTable(const std::vector<Book>& books) const {
         bool borrowed = library->isBookBorrowedByUser(currentUser->getId(), book.getISBN().toStdString());
         tableWidget->setItem(row, 6, new QTableWidgetItem(borrowed ? "是" : "否"));
     }
+}
+
+void MainWindow::onChangePasswordClicked() {
+    bool ok1, ok2;
+    QString oldPassword = QInputDialog::getText(this, "修改密码", "请输入原密码：", QLineEdit::Password, "", &ok1);
+    if (!ok1) return;
+
+    if (oldPassword != QString::fromStdString(currentUser->getPassword())) {
+        QMessageBox::warning(this, "错误", "原密码错误！");
+        return;
+    }
+
+    QString newPassword = QInputDialog::getText(this, "修改密码", "请输入新密码：", QLineEdit::Password, "", &ok2);
+    if (!ok2) return;
+
+    if (newPassword.isEmpty()) {
+        QMessageBox::warning(this, "错误", "新密码不能为空！");
+        return;
+    }
+
+    currentUser->setPassword(newPassword.toStdString());
+    QMessageBox::information(this, "成功", "密码修改成功！");
+    trySaveData();
 }

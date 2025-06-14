@@ -12,9 +12,10 @@
 #include <QContextMenuEvent>
 #include <QRegularExpression>
 #include <QMenu>
+#include <QVBoxLayout>
 
-AdminWindow::AdminWindow(Library* library, QWidget* parent)
-    : QMainWindow(parent), ui(new Ui::AdminWindow), library(library),
+AdminWindow::AdminWindow(Library* library, User* user, QWidget* parent)
+    : QMainWindow(parent), ui(new Ui::AdminWindow), library(library), currentUser(user),
       bookModel(new QStandardItemModel(this)), userModel(new QStandardItemModel(this)) {
     ui->setupUi(this);
     setupBookTable();
@@ -27,7 +28,8 @@ AdminWindow::AdminWindow(Library* library, QWidget* parent)
     connect(ui->btnEditBook, &QPushButton::clicked, this, &AdminWindow::onEditBook);
     connect(ui->btnDeleteBook, &QPushButton::clicked, this, &AdminWindow::onDeleteBook);
     connect(ui->btnSearchBook, &QPushButton::clicked, this, &AdminWindow::onSearchBook);
-
+    //管理员密码修改链接
+    connect(ui->btnChangePassword, &QPushButton::clicked, this, &AdminWindow::onChangePasswordClicked);
     // 用户按钮连接
     connect(ui->btnAddUser, &QPushButton::clicked, this, &AdminWindow::onAddUser);
     connect(ui->btnEditUser, &QPushButton::clicked, this, &AdminWindow::onEditUser);
@@ -329,4 +331,27 @@ void AdminWindow::onSearchUser() {
             });
         }
     }
+}
+
+void AdminWindow::onChangePasswordClicked() {
+    bool ok1, ok2;
+    QString oldPassword = QInputDialog::getText(this, "修改密码", "请输入原密码：", QLineEdit::Password, "", &ok1);
+    if (!ok1) return;
+
+    if (oldPassword != QString::fromStdString(currentUser->getPassword())) {
+        QMessageBox::warning(this, "错误", "原密码错误！");
+        return;
+    }
+
+    QString newPassword = QInputDialog::getText(this, "修改密码", "请输入新密码：", QLineEdit::Password, "", &ok2);
+    if (!ok2) return;
+
+    if (newPassword.isEmpty()) {
+        QMessageBox::warning(this, "错误", "新密码不能为空！");
+        return;
+    }
+
+    currentUser->setPassword(newPassword.toStdString());
+    QMessageBox::information(this, "成功", "密码修改成功！");
+    trySaveData();
 }
