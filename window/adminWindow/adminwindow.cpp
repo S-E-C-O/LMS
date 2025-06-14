@@ -17,6 +17,8 @@
 AdminWindow::AdminWindow(Library* library, User* user, QWidget* parent)
     : QMainWindow(parent), ui(new Ui::AdminWindow), library(library), currentUser(user),
       bookModel(new QStandardItemModel(this)), userModel(new QStandardItemModel(this)) {
+    const QIcon icon(":/resources/favicon.png");
+    this->setWindowIcon(icon);
     ui->setupUi(this);
     setupBookTable();
     setupUserTable();

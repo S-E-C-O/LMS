@@ -7,10 +7,9 @@
 #include "bookeditdialog.h"
 #include "ui_bookeditdialog.h"
 
-BookEditDialog::BookEditDialog(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::BookEditDialog)
-{
+BookEditDialog::BookEditDialog(QWidget *parent) : QDialog(parent), ui(new Ui::BookEditDialog) {
+    const QIcon icon(":/resources/favicon.png");
+    this->setWindowIcon(icon);
     ui->setupUi(this);
 }
 

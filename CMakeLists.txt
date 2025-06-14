@@ -17,7 +17,9 @@ find_package(Qt6 COMPONENTS
   Widgets
   REQUIRED)
 
-add_executable(LMS src/main.cpp
+add_executable(LMS
+        resources/icon.qrc
+        src/main.cpp
         src/Book.cpp
         include/library/Book.h
         src/User.cpp

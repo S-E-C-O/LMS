@@ -11,6 +11,8 @@
 
 LoginWindow::LoginWindow(Library* library, QWidget* parent)
     : QWidget(parent), library(library) {
+    const QIcon icon(":/resources/favicon.png");
+    this->setWindowIcon(icon);
 
     idEdit = new QLineEdit(this);
     idEdit->setPlaceholderText("ID");

@@ -14,6 +14,8 @@
 
 MainWindow::MainWindow(Library* library, User* user, QWidget* parent)
     : QMainWindow(parent), library(library), currentUser(user) {
+    const QIcon icon(":/resources/favicon.png");
+    this->setWindowIcon(icon);
     resize(QSize(1000, 600));
 
     auto* centralWidget = new QWidget(this);

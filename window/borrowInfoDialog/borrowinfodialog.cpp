@@ -11,6 +11,8 @@
 
 BorrowInfoDialog::BorrowInfoDialog(QWidget* parent)
     : QDialog(parent), ui(new Ui::BorrowInfoDialog) {
+    const QIcon icon(":/resources/favicon.png");
+    this->setWindowIcon(icon);
     ui->setupUi(this);
     ui->tableWidget->setColumnCount(2);
     ui->tableWidget->setHorizontalHeaderLabels(QStringList() << "ISBN" << "借阅时间");
