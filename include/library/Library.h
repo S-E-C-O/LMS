@@ -16,8 +16,9 @@ class Library {
     std::filesystem::path user_data_file_path;
     std::filesystem::path book_data_file_path;
 
-
 public:
+    Library(const std::filesystem::path& userPath, const std::filesystem::path& bookPath);
+
     void setDataFilePaths(const std::filesystem::path& userPath, const std::filesystem::path& bookPath);
     std::vector<std::filesystem::path> getDataFilePaths();
 

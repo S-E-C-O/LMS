@@ -5,18 +5,38 @@
 #include "AdminWindow.h"
 #include "MainWindow.h"
 #include "Library.h"
+#include <QFile>
+#include <QDebug>
+
+void removeReadOnlyAttribute(const QString& filePath) {
+    QFile file(filePath);
+    if (file.exists() && !file.isWritable()) {
+        if (file.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner |
+                                QFileDevice::ReadGroup | QFileDevice::WriteGroup |
+                                QFileDevice::ReadOther | QFileDevice::WriteOther)) {
+            qDebug() << "Removed read-only attribute from:" << filePath;
+                                } else {
+                                    qWarning() << "Failed to remove read-only attribute from:" << filePath;
+                                }
+    }
+}
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
 
-    Library library;
     const QString dataDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     QDir().mkpath(dataDir);
 
-    std::filesystem::path userPath = (dataDir + "/user.dat").toStdString();
-    std::filesystem::path bookPath = (dataDir + "/book.dat").toStdString();
-    library.setDataFilePaths(userPath, bookPath);
-    library.loadFromFile(userPath, bookPath);
+    QString userFile = dataDir + "/user.dat";
+    QString bookFile = dataDir + "/book.dat";
+
+    removeReadOnlyAttribute(userFile);
+    removeReadOnlyAttribute(bookFile);
+
+    std::filesystem::path userPath = userFile.toStdString();
+    std::filesystem::path bookPath = bookFile.toStdString();
+
+    Library library(userPath, bookPath);
 
     LoginWindow login(&library);
 

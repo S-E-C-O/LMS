@@ -11,6 +11,11 @@
 
 #include "CompressionUtil.h"
 
+Library::Library(const std::filesystem::path& userPath, const std::filesystem::path& bookPath)
+    : user_data_file_path(userPath), book_data_file_path(bookPath) {
+    loadFromFile(userPath, bookPath);
+}
+
 void Library::setDataFilePaths(const std::filesystem::path& userPath, const std::filesystem::path& bookPath) {
     user_data_file_path = userPath;
     book_data_file_path = bookPath;
@@ -185,17 +190,25 @@ bool Library::returnBook(long long userId, const QString& ISBN) {
 bool Library::isBookBorrowedByUser(long long userId, const std::string& isbn)  {
     auto user = findUserById(userId);
     if (!user) return false;
-    const auto& borrowedBooks = user->getBorrowedBooks(); // 假设返回 vector<string> 或 set<string>
+    const auto& borrowedBooks = user->getBorrowedBooks();
     return std::find(borrowedBooks.begin(), borrowedBooks.end(), isbn) != borrowedBooks.end();
 }
 
 
 void Library::saveToFile(const std::filesystem::path &userFile, const std::filesystem::path &bookFile) const {
+    qDebug() << "保存用户路径: " << QString::fromStdString(userFile.string());
+    qDebug() << "保存图书路径: " << QString::fromStdString(bookFile.string());
+
     QFile userQFile(QString::fromStdString(userFile.string()));
     QFile bookQFile(QString::fromStdString(bookFile.string()));
 
-    if (!userQFile.open(QIODevice::WriteOnly) || !bookQFile.open(QIODevice::WriteOnly))
-        throw std::runtime_error("Failed to open data files for saving");
+    if (!userQFile.open(QIODevice::WriteOnly)) {
+        qDebug() << "userQFile open failed:" << userQFile.errorString();
+    }
+    if (!bookQFile.open(QIODevice::WriteOnly)) {
+        qDebug() << "bookQFile open failed:" << bookQFile.errorString();
+    }
+
 
     QDataStream uout(&userQFile);
     QDataStream bout(&bookQFile);
@@ -222,6 +235,9 @@ void Library::saveToFile(const std::filesystem::path &userFile, const std::files
 
 
 void Library::loadFromFile(const std::filesystem::path &userFile, const std::filesystem::path &bookFile) {
+    qDebug() << "加载用户路径: " << QString::fromStdString(userFile.string());
+    qDebug() << "加载图书路径: " << QString::fromStdString(bookFile.string());
+
     users.clear();
     books.clear();
 
